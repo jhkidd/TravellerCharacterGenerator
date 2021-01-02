@@ -1,1 +1,417 @@
-Hello World
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mongoose Traveller 2nd Edition</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
+
+  <style>
+  	#draggable1 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
+  	#draggable2 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
+  	#draggable3 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
+  	#draggable4 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
+  	#draggable5 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
+  	#draggable6 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
+
+  	#droppable1 { width: 50px; height: 50px; float:left; text-align:center;}
+  	#droppable2 { width: 50px; height: 50px; float:left; text-align:center;}
+  	#droppable3 { width: 50px; height: 50px; float:left; text-align:center;}
+  	#droppable4 { width: 50px; height: 50px; float:left; text-align:center;}
+  	#droppable5 { width: 50px; height: 50px; float:left; text-align:center;}
+  	#droppable6 { width: 50px; height: 50px; float:left; text-align:center;}
+
+  	#column-content {
+      display: inline-block;
+    }
+    #diceTray {
+      display: inline-block;
+    }
+  	#description {
+  	  padding-top: 15px;
+  	  padding-left: 10px;
+	  display: inline-block;
+	  vertical-align: middle;
+	}
+
+    .checkbox-grid li {
+      display: block;
+      float: left;
+      width: 25%;
+    }
+
+    .tooltip {
+      position: relative;
+	  display: inline-block;
+	  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+	}
+
+	/* Tooltip text */
+	.tooltip .tooltiptext {
+	  visibility: hidden;
+	  width: 120px;
+	  background-color: black;
+	  color: #fff;
+	  text-align: center;
+	  padding: 5px 0;
+	  border-radius: 6px;
+
+	}
+
+  </style>
+
+  <script>
+
+  	var charStr = 0
+  	var charDex = 0
+  	var charEnd = 0
+  	var charInt = 0
+  	var charEdu = 0
+  	var charSoc = 0
+
+  	var charStrMod = 0
+  	var charDexMod = 0
+  	var charEndMod = 0
+  	var charIntMod = 0
+  	var charEduMod = 0
+  	var charSocMod = 0
+
+  	var numInitialSkills = 0
+
+    // TODO: disable clicking tabs to open acordion
+
+  	$( function() {
+  		// Setup accordion
+      $( "#accordion" ).accordion();
+    } );
+
+    function changeActiveAccordion(newTab) {
+    	// Function to change the accordion to a specific tab
+    	$( "#accordion" ).accordion( "option", "active", newTab);
+    };
+
+    function determineModifier(characteristic) {
+    	switch(characteristic) {
+      	  case 2:
+      	    return -2
+      	    break
+      	  case 3:
+      	  case 4:
+      	  case 5:
+      	    return -1
+      	    break
+      	  case 6:
+      	  case 7:
+      	  case 8:
+      	    return 0
+      	    break
+      	  case 9:
+      	  case 10:
+      	  case 11:
+      	    return 1
+      	    break
+      	  case 12:
+      	    return 2
+      	}
+    }
+
+     function twoDice() {
+      // Simulates rolling two 6 sided dice.
+      return Math.floor((Math.random() * 6) + 1) + Math.floor((Math.random() * 6) + 1);
+    };
+
+
+    function rollDice() {
+      // Generate 6 values for characteristics, then create draggable divs.
+
+      
+	  var dice1 = document.createElement("div");
+	  dice1.id = "draggable1";
+	  dice1.addClass = "ui-widget-content";
+      dice1.appendChild(
+      	document.createTextNode(twoDice())
+      );
+      document.getElementById("diceTray").appendChild(dice1)
+
+      var dice2 = document.createElement("div");
+	  dice2.id = "draggable2";
+	  dice2.addClass = "ui-widget-content";
+      dice2.appendChild(
+      	document.createTextNode(twoDice())
+      );
+      document.getElementById("diceTray").appendChild(dice2)
+
+      var dice3 = document.createElement("div");
+	  dice3.id = "draggable3";
+	  dice3.addClass = "ui-widget-content";
+      dice3.appendChild(
+      	document.createTextNode(twoDice())
+      );
+      document.getElementById("diceTray").appendChild(dice3)
+
+      var dice4 = document.createElement("div");
+	  dice4.id = "draggable4";
+	  dice4.addClass = "ui-widget-content";
+      dice4.appendChild(
+      	document.createTextNode(twoDice())
+      );
+      document.getElementById("diceTray").appendChild(dice4)
+
+      var dice5 = document.createElement("div");
+	  dice5.id = "draggable5";
+	  dice5.addClass = "ui-widget-content";
+      dice5.appendChild(
+      	document.createTextNode(twoDice())
+      );
+      document.getElementById("diceTray").appendChild(dice5)
+
+      var dice6 = document.createElement("div");
+	  dice6.id = "draggable6";
+	  dice6.addClass = "ui-widget-content";
+      dice6.appendChild(
+      	document.createTextNode(twoDice())
+      );
+      document.getElementById("diceTray").appendChild(dice6)
+
+      // set all draggable elements to be draggable
+	  $( "#draggable1" ).draggable({ revert: "invalid" })
+	  $( "#draggable2" ).draggable({ revert: "invalid" })
+	  $( "#draggable3" ).draggable({ revert: "invalid" })
+	  $( "#draggable4" ).draggable({ revert: "invalid" })
+	  $( "#draggable5" ).draggable({ revert: "invalid" })
+	  $( "#draggable6" ).draggable({ revert: "invalid" })
+
+
+      document.getElementById("confirmCharacteristics").disabled = false
+      document.getElementById("rollDiceButton").disabled = true
+    };
+
+
+    function setCharacteristics() {
+      // Lock in the characteristics
+      numInitialSkills = 3 + charEduMod
+
+      var div = document.getElementById("startingSkills")
+      div.innerHTML = "You can pick " + numInitialSkills + " skills due to your education."
+      
+    }
+
+
+    $( function() {
+      $( document ).tooltip();
+
+      $( "#droppable1" ).droppable({drop: function( event, ui ) {
+      	$( this ).addClass( "ui-state-highlight" )
+      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
+      	charStr = parseInt(ui.draggable[0].textContent)
+      	charStrMod = determineModifier(parseInt(ui.draggable[0].textContent))
+
+      }});
+
+      $( "#droppable2" ).droppable({drop: function( event, ui ) {
+      	$( this ).addClass( "ui-state-highlight" )
+      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
+      	charDex = parseInt(ui.draggable[0].textContent)
+      	charDexMod = determineModifier(parseInt(ui.draggable[0].textContent))
+
+      }});
+      $( "#droppable3" ).droppable({drop: function( event, ui ) {
+      	$( this ).addClass( "ui-state-highlight" )
+      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
+      	charEnd = parseInt(ui.draggable[0].textContent)
+      	charEndMod = determineModifier(parseInt(ui.draggable[0].textContent))
+      }
+      });
+      $( "#droppable4" ).droppable({drop: function( event, ui ) {
+      	$( this ).addClass( "ui-state-highlight" )
+      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
+      	charInt = parseInt(ui.draggable[0].textContent)
+      	charIntMod = determineModifier(parseInt(ui.draggable[0].textContent))
+      }
+      });
+      $( "#droppable5" ).droppable({drop: function( event, ui ) {
+      	$( this ).addClass( "ui-state-highlight" )
+      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
+      	charEdu = parseInt(ui.draggable[0].textContent)
+      	charEduMod = determineModifier(parseInt(ui.draggable[0].textContent))
+      }
+      });
+      $( "#droppable6" ).droppable({drop: function( event, ui ) {
+      	$( this ).addClass( "ui-state-highlight" )
+      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
+      	charSoc = parseInt(ui.draggable[0].textContent)
+      	charSocMod = determineModifier(parseInt(ui.draggable[0].textContent))
+      }
+      });
+    } );
+
+  </script>
+</head>
+<body>
+
+<div id="accordion">
+  <h3>Introduction</h3>
+  <div>
+    <p>
+      Traveller uses a unique method to create characters ready for play. Instead of choosing a class and various skills or abilities,
+      in Traveller you start off as a bright-eyed 18 year old with the whole universe at your feet. You will then decide what kind of 
+      career you might want to engage in and then watch as your Traveller’s life unfolds – very possibly in a completely different 
+      direction!
+    </p>
+    <p>
+      When you have finished this process, you will be ready for play with a Traveller who has history and a full career (successful or
+      otherwise) behind them. They will now be ready for the next phase of their life, one full of excitement and adventure…
+    </p>
+    <p>
+      It should be noted that there are no ‘super’ characters in Traveller. This game is very much based around the idea of putting 
+      ordinary people in extraordinary situations, and of playing with the cards that the universe has dealt to you. Be ready to make 
+      the best of what you get – much like real life (though real life tends to lack starships, exploding suns and eight foot tall 
+      intelligent lion-like aliens).
+    </p>
+    <p>
+      So, another player may end up with a battle-hardened marine who can shoot out a fox’s eye at a hundred paces with any weapon in 
+      Charted Space, but your failed rock star who never managed to get anywhere in his career may well have more to contribute to the 
+      group. After all, not every problem can be solved with a gun. In fact, in Traveller, a gun may cause more issues than it solves.
+    </p>
+
+    <button onclick="changeActiveAccordion(1)">Continue</button>
+  </div>
+  <h3>Characteristics</h3>
+  <div>
+    <p>
+  	  Every person and creature in Traveller has several characteristics that describe their base mental and physical potential. These 
+  	  are determined by rolling two D6, six different times, to generate six scores. You can then choose which of these values to apply to 
+  	  each statistic.
+    </p>
+    <p>
+      A value of 7 is considered average, with 2 being the lowest possible value and 12 being the highest. As we roll two dice, extreme 
+      values are less likely. There's a 1 in 36 chance of getting 2 (You must roll two 1s), and a 1 in 6 chance of 
+      getting 7 (You can roll either a 1 and a 6, or a 2 and a 5, etc.)
+    </p>
+    <p>
+    	Depending on the characteristic score, there is an associated dice modifier (DM). A score of 2 gives a DM of -2; a score of 3 to 5 
+    	gives a DM of -1; a score of 6 to 8 gives a DM of 0; a score of 9 to 11 gives a DM of +1; and a score of 12 gives a DM of +2.
+    </p>
+    <p> 
+    	These characteristics also affect your chance of qualifying and being promoted in various jobs in later sections, for instance to 
+    	become a Merchant you roll two D6, and add your INT DM. If you score 4 or above you succed in becoming a Merchant. Hover over the 
+    	characteristics below to see which jobs rely on them and the dice roll needed. 
+    </p>
+    <p>
+    	Roll the dice then drag them into the box you want.
+    </p>
+    <button id="rollDiceButton" onclick="rollDice()"> Roll dice </button>
+
+    <br /> 
+
+    <div id="diceTray"></div>
+
+    <br /> 
+
+    <div id="column-content">
+      <div id="droppable1" class="ui-widget-header">
+      	STR
+      </div>
+      <span id="description" title="None"><b>Strength:</b> A Traveller’s physical strength, fitness and forcefulness.</span>
+    </div><br />
+
+    <div id="column-content">
+      <div id="droppable2" class="ui-widget-header">
+      	DEX
+      </div>
+      <span id="description" title="Entertainer 5+; Rogue 6+"><b>Dexterity:</b> Physical co-ordination and agility, reflexes.</span>
+    </div><br />
+
+    <div id="column-content">
+      <div id="droppable3" class="ui-widget-header">
+      	END
+      </div>
+      <span id="description" title="Army 5+; Marine 6+"><b>Endurance:</b> A Traveller’s stamina, determination and ability to sustain damage.</span>
+    </div><br />
+
+    <div id="column-content">
+      <div id="droppable4" class="ui-widget-header">
+      	INT
+      </div>
+      <span id="description" title="Agent 6+; Entertainer 5+; Merchant 4+; Navy 6+; Scholar 6+; Scout 5+"><b>Intellect:</b> A Traveller’s intelligence and quickness of mind.</span>
+    </div><br />
+
+    <div id="column-content">
+      <div id="droppable5" class="ui-widget-header">
+      	EDU
+      </div>
+      <span id="description" title="Citizen 5+"><b>Education:</b> A measure of a Traveller’s learning and experience. Higher Education lets you start with more skills.</span>
+    </div><br />
+
+    <div id="column-content">
+      <div id="droppable6" class="ui-widget-header">
+      	SOC
+      </div>
+      <span id="description" title="Noble 10+"><b>Social Standing:</b> A Traveller’s place in society.</span>
+    </div><br /><br />
+
+    <button id="confirmCharacteristics" onclick="changeActiveAccordion(2);setCharacteristics()" disabled>Continue</button> <br /><br />
+  </div>
+  <h3>Starting Skills</h3>
+  <div>
+  	<p>
+  		Skills are the most important aspect of a Traveller, and represents how well they can perform various tasks. 
+  	</p>
+  	<p>
+  		If a character is untrained in a skill they suffer a DM-3 when trying to use that skill. If a character has level zero that means 
+  		that they are competent in using that skill, but has had little experience. They do not get any bonuses but avoid the -3 penalty.
+  		If a traveller has one or more levels in a skill (Skill 1, Skill 2, etc.) they are trained. Levels 2-3 indicate a skilled 
+  		profesional, and 4-5 mean the character is probably well respected and known at least planet wide. Each level indicates several 
+  		years of experience using that skill, and grants DM+1 per level for any checks using that skill. 
+  	</p>
+  	<p>
+      Some skills have specialities – specialised, more focussed forms of that skill. A Traveller picks a speciality when he gains level 1 
+      in a skill that has two or more specialities. For example, a Traveller might have Engineer 0, allowing him to make Engineer skill checks 
+      without the unskilled penalty. He might then gain a level in Engineer, at which point he would need to choose a speciality. For Engineer, 
+      this is a choice between jump drive, manoeuvre drive, power plant and electronics.
+  	</p>
+  	<p>
+      Before embarking on your careers, you receive a number of level zero skills equal to your Education DM +3, chosen from the list below. This
+      represents the knowledge you have picked up during adolescence and will allow you to function at a basic level in a technological society.
+  	</p>
+  	<div id="startingSkills"></div>
+  	<br/>
+
+  	<ul class="checkbox-grid">
+  		<li title="Admin: This skill covers bureaucracies and administration of all sorts, including the navigation of bureaucratic obstacles or disasters. It also covers tracking inventories, ship manifests and other records."><input type="checkbox" id="chkAdmin" value="Admin"/> Admin 0</li>
+  		<li title="Animals: This skill, rare on industrialised or technologically advanced worlds, is for the care of animals."><input type="checkbox" id="chkAnimals" value="Animals" /> Animals 0</li>
+  		<li title="Art: The Traveller is trained in a type of creative art."><input type="checkbox" id="chkArt" value="Art" /> Art 0</li>
+  		<li title="Athletics: The Traveller is a trained athlete and is physically fit. The Athletics skill effectively augments a Traveller’s physical characteristics; whatever you can do with Strength alone you can also add your Athletics (strength) DM to, for example. Athletics is also the principal skill used in adverse gravitational environments, specifically Athletics (dexterity) in low or zero-G, and Athletics (strength) in high-G locations."><input type="checkbox" id="chkAthletics" value="Athletics" /> Athletics 0</li>
+  		<li title="Carouse: Carousing is the art of socialising; having fun, but also ensuring other people have fun, and infectious good humour. It also covers social awareness and subterfuge in such situations."><input type="checkbox" id="chkCarouse" value="Carouse" /> Carouse 0</li>
+  		<li title="Drive: This skill is for controlling ground vehicles of various types. There are several specialities."><input type="checkbox" id="chkDrive" value="Drive" /> Drive 0</li>
+  		<li title="Electronics: This skill is used to operate electronic devices such as computers and ship-board systems. Higher levels represent the ability to repair and create electronic devices and systems. There are several specialities."><input type="checkbox" id="chkElectronics" value="Electronics" /> Electronics 0</li>
+  		<li title="Flyer: The various specialities of this skill cover different types of flying vehicles. Flyers only work in an atmosphere; vehicles that can leave the atmosphere and enter orbit generally use the Pilot skill."><input type="checkbox" id="chkFlyer" value="Flyer" /> Flyer 0</li>
+  		<li title="Language: There are numerous different Language specialities, each one covering reading and writing a different language. All Travellers can speak and read their native language without needing the Language skill, and automated computer translator programs mean Language skills are not always needed on other worlds. Having Language 0 implies the Traveller has a smattering of simple phrases in several languages."><input type="checkbox" id="chkLanguage" value="Language" /> Language 0</li>
+  		<li title="Mechanic: The Mechanic skill allows a Traveller to maintain and repair most equipment – some advanced equipment and spacecraft components require the Engineer skill. Unlike the narrower and more focussed Engineer or Science skills, Mechanic does not allow a Traveller to build new devices or alter existing ones – it is purely for repairs and maintenance but covers all types of equipment."><input type="checkbox" id="chkMechanic" value="Mechanic" /> Mechanic 0</li>
+  		<li title="Medic: The Medic skill covers emergency first aid and battlefield triage as well as diagnosis, treatment, surgery and longterm care."><input type="checkbox" id="chkMedic" value="Medic" /> Medic 0</li>
+  		<li title="Profession: A Traveller with a Profession skill is trained in producing useful goods or services. There are many different Profession specialities, but each one works the same way – the Traveller can make a Profession check to earn money on a planet that supports that trade. The amount of money raised is Cr250 x the Effect of the check per month. Unlike other skills with specialties, levels in the Profession skill do not grant the ability to use other specialties at level 0. Each specialty must be learned individually. Someone with a Profession skill of 0 has a general grasp of working for a living but little experience beyond the most menial jobs."><input type="checkbox" id="chkProfession" value="Profession" /> Profession 0</li>
+  		<li title="Science: The Science skill covers not just knowledge but also practical application of that knowledge where such practical application is possible. There are a large range of specialities."><input type="checkbox" id="chkScience" value="Science" /> Science 0</li>
+  		<li title="Seafarer: The Seafarer skill covers all manner of watercraft and ocean travel."><input type="checkbox" id="chkSeafarer" value="Seafarer" /> Seafarer 0</li>
+  		<li title="Streetwise: A Traveller with the Streetwise skill understands the urban environment and the power structures in society. On his homeworld and in related systems, he knows criminal contacts and fixers. On other worlds, he can quickly intuit power structures and can fit into local underworlds."><input type="checkbox" id="chkStreetwise" value="Streetwise" /> Streetwise 0</li>
+  		<li title="Survival: The Survival skill is the wilderness counterpart of the urban Streetwise skill – the Traveller is trained to survive in the wild, build shelters, hunt or trap animals, avoid exposure and so forth. He can recognise plants and animals of his homeworld and related planets, and can pick up on common clues and traits even on unfamiliar worlds."><input type="checkbox" id="chkSurvival" value="Survival" /> Survival 0</li>
+  		<li title="Vacc Suit: The Vacc Suit skill allows a Traveller to wear and operate spacesuits and environmental suits. A Traveller will rarely need to make Vacc Suit checks under ordinary circumstances – merely possessing the skill is enough. If the Traveller does not have the requisite Vacc Suit skill for the suit he is wearing, he suffers DM-2 to all skill checks made while wearing a suit for each missing level. This skill also permits the character to operate advanced battle armour."><input type="checkbox" id="chkVaccSuit" value="Vacc Suit" /> Vacc Suit 0</li>
+  	</ul>
+
+    <br />
+    <br />
+
+  	<button onclick="changeActiveAccordion(3)">Continue</button>
+
+  </div>
+  <h3>Section 4</h3>
+  <div>
+
+  	<button onclick="changeActiveAccordion(0)">Continue</button>
+  </div>
+</div>
+
+</body>
+</html> 
+
