@@ -39,7 +39,7 @@
     .checkbox-grid li {
       display: block;
       float: left;
-      width: 25%;
+      width: 50%;
     }
 
     .tooltip {
@@ -80,6 +80,8 @@
 
   	var numInitialSkills = 0
 
+  	var charSkills = {}
+
     // TODO: disable clicking tabs to open acordion
 
   	$( function() {
@@ -117,9 +119,35 @@
       	}
     }
 
+    function diceToColour(diceRoll) {
+    	// Function to pick the colours of dice, red indicating a bad roll up to green as a good roll
+    	switch(diceRoll) {
+    	  case 2:
+      	    return '#fb6a4a'
+      	    break
+      	  case 3:
+      	  case 4:
+      	  case 5:
+      	    return '#f5c9b8'
+      	    break
+      	  case 6:
+      	  case 7:
+      	  case 8:
+      	    return '#edf8fb'
+      	    break
+      	  case 9:
+      	  case 10:
+      	  case 11:
+      	    return '#b2e2e2'
+      	    break
+      	  case 12:
+      	    return '#66c2a4'
+    	}
+    }
+
      function twoDice() {
       // Simulates rolling two 6 sided dice.
-      return Math.floor((Math.random() * 6) + 1) + Math.floor((Math.random() * 6) + 1);
+      return 2 + Math.floor(Math.random()*6) + Math.floor(Math.random()*6);
     };
 
 
@@ -130,49 +158,60 @@
 	  var dice1 = document.createElement("div");
 	  dice1.id = "draggable1";
 	  dice1.addClass = "ui-widget-content";
+	  var characteristicScore = twoDice()
       dice1.appendChild(
-      	document.createTextNode(twoDice())
+      	document.createTextNode(characteristicScore)
       );
+      dice1.style.backgroundColor = diceToColour(characteristicScore)
       document.getElementById("diceTray").appendChild(dice1)
 
       var dice2 = document.createElement("div");
 	  dice2.id = "draggable2";
 	  dice2.addClass = "ui-widget-content";
+      var characteristicScore = twoDice()
       dice2.appendChild(
-      	document.createTextNode(twoDice())
+      	document.createTextNode(characteristicScore)
       );
+      dice2.style.backgroundColor = diceToColour(characteristicScore)
       document.getElementById("diceTray").appendChild(dice2)
 
       var dice3 = document.createElement("div");
 	  dice3.id = "draggable3";
 	  dice3.addClass = "ui-widget-content";
+      var characteristicScore = twoDice()
       dice3.appendChild(
-      	document.createTextNode(twoDice())
+      	document.createTextNode(characteristicScore)
       );
+      dice3.style.backgroundColor = diceToColour(characteristicScore)
       document.getElementById("diceTray").appendChild(dice3)
 
       var dice4 = document.createElement("div");
 	  dice4.id = "draggable4";
 	  dice4.addClass = "ui-widget-content";
+      var characteristicScore = twoDice()
       dice4.appendChild(
-      	document.createTextNode(twoDice())
+      	document.createTextNode(characteristicScore)
       );
+      dice4.style.backgroundColor = diceToColour(characteristicScore)
       document.getElementById("diceTray").appendChild(dice4)
 
       var dice5 = document.createElement("div");
 	  dice5.id = "draggable5";
 	  dice5.addClass = "ui-widget-content";
+      var characteristicScore = twoDice()
       dice5.appendChild(
-      	document.createTextNode(twoDice())
+      	document.createTextNode(characteristicScore)
       );
+      dice5.style.backgroundColor = diceToColour(characteristicScore)
       document.getElementById("diceTray").appendChild(dice5)
 
       var dice6 = document.createElement("div");
 	  dice6.id = "draggable6";
-	  dice6.addClass = "ui-widget-content";
+	  var characteristicScore = twoDice()
       dice6.appendChild(
-      	document.createTextNode(twoDice())
+      	document.createTextNode(characteristicScore)
       );
+      dice6.style.backgroundColor = diceToColour(characteristicScore)
       document.getElementById("diceTray").appendChild(dice6)
 
       // set all draggable elements to be draggable
@@ -193,9 +232,78 @@
       // Lock in the characteristics
       numInitialSkills = 3 + charEduMod
 
+      numberValidSkills()
+
       var div = document.getElementById("startingSkills")
       div.innerHTML = "You can pick " + numInitialSkills + " skills due to your education."
+
+      div = document.getElementById("character-str")
+      div.innerHTML = charStr + " (" + charStrMod + ")"
+      div = document.getElementById("character-dex")
+      div.innerHTML = charDex + " (" + charDexMod + ")"
+      div = document.getElementById("character-end")
+      div.innerHTML = charEnd + " (" + charEndMod + ")"
+      div = document.getElementById("character-int")
+      div.innerHTML = charInt + " (" + charIntMod + ")"
+      div = document.getElementById("character-edu")
+      div.innerHTML = charEdu + " (" + charEduMod + ")"
+      div = document.getElementById("character-soc")
+      div.innerHTML = charSoc + " (" + charSocMod + ")"
       
+    }
+
+    function setInitialSkills() {
+      // Lock in initial skills
+      var selectedSkills = findInitialSkills()
+
+      for (var i = 0; i < selectedSkills.length; i++) {
+      	charSkills[selectedSkills[i]] = 0
+      }
+
+      writeSkills()
+    }
+
+    function numberValidSkills() {
+    	// Check that the number of selected skills is correct
+    	var selectedSkills = findInitialSkills()
+    	if (selectedSkills.length == numInitialSkills) {
+    		document.getElementById("confirmSkills").disabled = false
+    	} else {
+    		document.getElementById("confirmSkills"). disabled = true
+    	}
+
+    }
+
+    function writeSkills() {
+      // Write the skills to the character sheet
+      var skillsText = ""
+      for (skill in charSkills) {
+      	skillsText += skill + " " + charSkills[skill] + "<br />"
+      }
+      document.getElementById("character-skills").innerHTML = skillsText
+    }
+
+    function findInitialSkills() {
+    	var selectedSkills = []
+
+    	if (document.getElementById("chkAdmin").checked) {selectedSkills.push("Admin")}
+    	if (document.getElementById("chkAnimals").checked) {selectedSkills.push("Animals")}
+    	if (document.getElementById("chkArt").checked) {selectedSkills.push("Art")}
+    	if (document.getElementById("chkAthletics").checked) {selectedSkills.push("Athletics")}
+    	if (document.getElementById("chkCarouse").checked) {selectedSkills.push("Carouse")}
+    	if (document.getElementById("chkDrive").checked) {selectedSkills.push("Drive")}
+    	if (document.getElementById("chkElectronics").checked) {selectedSkills.push("Electronics")}
+    	if (document.getElementById("chkFlyer").checked) {selectedSkills.push("Flyer")}
+    	if (document.getElementById("chkMechanic").checked) {selectedSkills.push("Mechanic")}
+    	if (document.getElementById("chkMedic").checked) {selectedSkills.push("Medic")}
+    	if (document.getElementById("chkProfession").checked) {selectedSkills.push("Profession")}
+    	if (document.getElementById("chkScience").checked) {selectedSkills.push("Science")}
+    	if (document.getElementById("chkSeafarer").checked) {selectedSkills.push("Seafarer")}
+    	if (document.getElementById("chkStreetwise").checked) {selectedSkills.push("Streetwise")}
+    	if (document.getElementById("chkSurvival").checked) {selectedSkills.push("Survival")}
+    	if (document.getElementById("chkVaccSuit").checked) {selectedSkills.push("Vacc Suit")}
+
+    	return selectedSkills
     }
 
 
@@ -380,36 +488,78 @@
   	<br/>
 
   	<ul class="checkbox-grid">
-  		<li title="Admin: This skill covers bureaucracies and administration of all sorts, including the navigation of bureaucratic obstacles or disasters. It also covers tracking inventories, ship manifests and other records."><input type="checkbox" id="chkAdmin" value="Admin"/> Admin 0</li>
-  		<li title="Animals: This skill, rare on industrialised or technologically advanced worlds, is for the care of animals."><input type="checkbox" id="chkAnimals" value="Animals" /> Animals 0</li>
-  		<li title="Art: The Traveller is trained in a type of creative art."><input type="checkbox" id="chkArt" value="Art" /> Art 0</li>
-  		<li title="Athletics: The Traveller is a trained athlete and is physically fit. The Athletics skill effectively augments a Traveller’s physical characteristics; whatever you can do with Strength alone you can also add your Athletics (strength) DM to, for example. Athletics is also the principal skill used in adverse gravitational environments, specifically Athletics (dexterity) in low or zero-G, and Athletics (strength) in high-G locations."><input type="checkbox" id="chkAthletics" value="Athletics" /> Athletics 0</li>
-  		<li title="Carouse: Carousing is the art of socialising; having fun, but also ensuring other people have fun, and infectious good humour. It also covers social awareness and subterfuge in such situations."><input type="checkbox" id="chkCarouse" value="Carouse" /> Carouse 0</li>
-  		<li title="Drive: This skill is for controlling ground vehicles of various types. There are several specialities."><input type="checkbox" id="chkDrive" value="Drive" /> Drive 0</li>
-  		<li title="Electronics: This skill is used to operate electronic devices such as computers and ship-board systems. Higher levels represent the ability to repair and create electronic devices and systems. There are several specialities."><input type="checkbox" id="chkElectronics" value="Electronics" /> Electronics 0</li>
-  		<li title="Flyer: The various specialities of this skill cover different types of flying vehicles. Flyers only work in an atmosphere; vehicles that can leave the atmosphere and enter orbit generally use the Pilot skill."><input type="checkbox" id="chkFlyer" value="Flyer" /> Flyer 0</li>
-  		<li title="Language: There are numerous different Language specialities, each one covering reading and writing a different language. All Travellers can speak and read their native language without needing the Language skill, and automated computer translator programs mean Language skills are not always needed on other worlds. Having Language 0 implies the Traveller has a smattering of simple phrases in several languages."><input type="checkbox" id="chkLanguage" value="Language" /> Language 0</li>
-  		<li title="Mechanic: The Mechanic skill allows a Traveller to maintain and repair most equipment – some advanced equipment and spacecraft components require the Engineer skill. Unlike the narrower and more focussed Engineer or Science skills, Mechanic does not allow a Traveller to build new devices or alter existing ones – it is purely for repairs and maintenance but covers all types of equipment."><input type="checkbox" id="chkMechanic" value="Mechanic" /> Mechanic 0</li>
-  		<li title="Medic: The Medic skill covers emergency first aid and battlefield triage as well as diagnosis, treatment, surgery and longterm care."><input type="checkbox" id="chkMedic" value="Medic" /> Medic 0</li>
-  		<li title="Profession: A Traveller with a Profession skill is trained in producing useful goods or services. There are many different Profession specialities, but each one works the same way – the Traveller can make a Profession check to earn money on a planet that supports that trade. The amount of money raised is Cr250 x the Effect of the check per month. Unlike other skills with specialties, levels in the Profession skill do not grant the ability to use other specialties at level 0. Each specialty must be learned individually. Someone with a Profession skill of 0 has a general grasp of working for a living but little experience beyond the most menial jobs."><input type="checkbox" id="chkProfession" value="Profession" /> Profession 0</li>
-  		<li title="Science: The Science skill covers not just knowledge but also practical application of that knowledge where such practical application is possible. There are a large range of specialities."><input type="checkbox" id="chkScience" value="Science" /> Science 0</li>
-  		<li title="Seafarer: The Seafarer skill covers all manner of watercraft and ocean travel."><input type="checkbox" id="chkSeafarer" value="Seafarer" /> Seafarer 0</li>
-  		<li title="Streetwise: A Traveller with the Streetwise skill understands the urban environment and the power structures in society. On his homeworld and in related systems, he knows criminal contacts and fixers. On other worlds, he can quickly intuit power structures and can fit into local underworlds."><input type="checkbox" id="chkStreetwise" value="Streetwise" /> Streetwise 0</li>
-  		<li title="Survival: The Survival skill is the wilderness counterpart of the urban Streetwise skill – the Traveller is trained to survive in the wild, build shelters, hunt or trap animals, avoid exposure and so forth. He can recognise plants and animals of his homeworld and related planets, and can pick up on common clues and traits even on unfamiliar worlds."><input type="checkbox" id="chkSurvival" value="Survival" /> Survival 0</li>
-  		<li title="Vacc Suit: The Vacc Suit skill allows a Traveller to wear and operate spacesuits and environmental suits. A Traveller will rarely need to make Vacc Suit checks under ordinary circumstances – merely possessing the skill is enough. If the Traveller does not have the requisite Vacc Suit skill for the suit he is wearing, he suffers DM-2 to all skill checks made while wearing a suit for each missing level. This skill also permits the character to operate advanced battle armour."><input type="checkbox" id="chkVaccSuit" value="Vacc Suit" /> Vacc Suit 0</li>
+  		<li title="Admin: This skill covers bureaucracies and administration of all sorts, including the navigation of bureaucratic obstacles or disasters. It also covers tracking inventories, ship manifests and other records."><input onclick="numberValidSkills()" type="checkbox" id="chkAdmin" value="Admin"/> Admin 0</li>
+  		<li title="Animals: This skill, rare on industrialised or technologically advanced worlds, is for the care of animals."><input onclick="numberValidSkills()" type="checkbox" id="chkAnimals" value="Animals" /> Animals 0</li>
+  		<li title="Art: The Traveller is trained in a type of creative art."><input onclick="numberValidSkills()" type="checkbox" id="chkArt" value="Art" /> Art 0</li>
+  		<li title="Athletics: The Traveller is a trained athlete and is physically fit. The Athletics skill effectively augments a Traveller’s physical characteristics; whatever you can do with Strength alone you can also add your Athletics (strength) DM to, for example. Athletics is also the principal skill used in adverse gravitational environments, specifically Athletics (dexterity) in low or zero-G, and Athletics (strength) in high-G locations."><input onclick="numberValidSkills()" type="checkbox" id="chkAthletics" value="Athletics" /> Athletics 0</li>
+  		<li title="Carouse: Carousing is the art of socialising; having fun, but also ensuring other people have fun, and infectious good humour. It also covers social awareness and subterfuge in such situations."><input onclick="numberValidSkills()" type="checkbox" id="chkCarouse" value="Carouse" /> Carouse 0</li>
+  		<li title="Drive: This skill is for controlling ground vehicles of various types. There are several specialities."><input onclick="numberValidSkills()" type="checkbox" id="chkDrive" value="Drive" /> Drive 0</li>
+  		<li title="Electronics: This skill is used to operate electronic devices such as computers and ship-board systems. Higher levels represent the ability to repair and create electronic devices and systems. There are several specialities."><input onclick="numberValidSkills()" type="checkbox" id="chkElectronics" value="Electronics" /> Electronics 0</li>
+  		<li title="Flyer: The various specialities of this skill cover different types of flying vehicles. Flyers only work in an atmosphere; vehicles that can leave the atmosphere and enter orbit generally use the Pilot skill."><input onclick="numberValidSkills()" type="checkbox" id="chkFlyer" value="Flyer" /> Flyer 0</li>
+  		<li title="Language: There are numerous different Language specialities, each one covering reading and writing a different language. All Travellers can speak and read their native language without needing the Language skill, and automated computer translator programs mean Language skills are not always needed on other worlds. Having Language 0 implies the Traveller has a smattering of simple phrases in several languages."><input onclick="numberValidSkills()" type="checkbox" id="chkLanguage" value="Language" /> Language 0</li>
+  		<li title="Mechanic: The Mechanic skill allows a Traveller to maintain and repair most equipment – some advanced equipment and spacecraft components require the Engineer skill. Unlike the narrower and more focussed Engineer or Science skills, Mechanic does not allow a Traveller to build new devices or alter existing ones – it is purely for repairs and maintenance but covers all types of equipment."><input onclick="numberValidSkills()" type="checkbox" id="chkMechanic" value="Mechanic" /> Mechanic 0</li>
+  		<li title="Medic: The Medic skill covers emergency first aid and battlefield triage as well as diagnosis, treatment, surgery and longterm care."><input onclick="numberValidSkills()" type="checkbox" id="chkMedic" value="Medic" /> Medic 0</li>
+  		<li title="Profession: A Traveller with a Profession skill is trained in producing useful goods or services. There are many different Profession specialities, but each one works the same way – the Traveller can make a Profession check to earn money on a planet that supports that trade. The amount of money raised is Cr250 x the Effect of the check per month. Unlike other skills with specialties, levels in the Profession skill do not grant the ability to use other specialties at level 0. Each specialty must be learned individually. Someone with a Profession skill of 0 has a general grasp of working for a living but little experience beyond the most menial jobs."><input onclick="numberValidSkills()" type="checkbox" id="chkProfession" value="Profession" /> Profession 0</li>
+  		<li title="Science: The Science skill covers not just knowledge but also practical application of that knowledge where such practical application is possible. There are a large range of specialities."><input onclick="numberValidSkills()" type="checkbox" id="chkScience" value="Science" /> Science 0</li>
+  		<li title="Seafarer: The Seafarer skill covers all manner of watercraft and ocean travel."><input onclick="numberValidSkills()" type="checkbox" id="chkSeafarer" value="Seafarer" /> Seafarer 0</li>
+  		<li title="Streetwise: A Traveller with the Streetwise skill understands the urban environment and the power structures in society. On his homeworld and in related systems, he knows criminal contacts and fixers. On other worlds, he can quickly intuit power structures and can fit into local underworlds."><input onclick="numberValidSkills()" type="checkbox" id="chkStreetwise" value="Streetwise" /> Streetwise 0</li>
+  		<li title="Survival: The Survival skill is the wilderness counterpart of the urban Streetwise skill – the Traveller is trained to survive in the wild, build shelters, hunt or trap animals, avoid exposure and so forth. He can recognise plants and animals of his homeworld and related planets, and can pick up on common clues and traits even on unfamiliar worlds."><input onclick="numberValidSkills()" type="checkbox" id="chkSurvival" value="Survival" /> Survival 0</li>
+  		<li title="Vacc Suit: The Vacc Suit skill allows a Traveller to wear and operate spacesuits and environmental suits. A Traveller will rarely need to make Vacc Suit checks under ordinary circumstances – merely possessing the skill is enough. If the Traveller does not have the requisite Vacc Suit skill for the suit he is wearing, he suffers DM-2 to all skill checks made while wearing a suit for each missing level. This skill also permits the character to operate advanced battle armour."><input onclick="numberValidSkills()" type="checkbox" id="chkVaccSuit" value="Vacc Suit" /> Vacc Suit 0</li>
   	</ul>
 
     <br />
     <br />
 
-  	<button onclick="changeActiveAccordion(3)">Continue</button>
+  	<button id="confirmSkills" onclick="changeActiveAccordion(3); setInitialSkills()">Continue</button>
 
   </div>
-  <h3>Section 4</h3>
+  <h3>Starting out</h3>
+  <div>
+
+  	<p>
+  		Next, your Traveller engages in one or more career terms, representing their previous experiences and adventures before the start 
+  		of the campaign. Each career term lasts for four years, even if a Traveller fails a Survival roll or is forced to leave a career. 
+  		At many points during a career, a Traveller will have to make a dice roll of some sort.
+  	</p> 
+  	<p>
+  		Most of these rolls are based on characteristics – simply roll 2D, add the DM from the listed characteristic, and try to get a 
+  		total higher than or equal to the listed value. So, a roll of INT 8+ means ‘roll 2D, add your Intellect DM, and you succeed if you
+  		roll an 8 or more’. 
+  	</p>
+  	<p>
+  		In each career, there are three assignments, representing different aspects of the career. Pick one of these assignments when you 
+  		enter the career. 
+  	</p>
+  	<p>
+  		
+  	</p>
+
+  	<button onclick="changeActiveAccordion(4)">Continue</button>
+  </div>
+
+  <h3>section 5</h3>
   <div>
 
   	<button onclick="changeActiveAccordion(0)">Continue</button>
   </div>
+</div>
+
+<br/>
+
+<div id="character-sheet">
+  <b>NAME:</b> <span id="character-name"></span><br/>
+  <b>AGE:</b> <span id="character-age">0</span><br/>
+  <h2>CHARACTERISTICS:</h2><br/>
+  <b>STR:</b><span id="character-str">0</span>&nbsp;&nbsp;
+  <b>DEX:</b><span id="character-dex">0</span>&nbsp;&nbsp;
+  <b>END:</b><span id="character-end">0</span>&nbsp;&nbsp;
+  <b>INT:</b><span id="character-int">0</span>&nbsp;&nbsp;
+  <b>EDU:</b><span id="character-edu">0</span>&nbsp;&nbsp;
+  <b>SOC:</b><span id="character-soc">0</span><br/>
+  <h2> Skills: </h2><br/>
+  <span id="character-skills"></span><br/>
+  <h2> Career: </h2><br/>
+  <span id="character-Career"></span><br/>
 </div>
 
 </body>
