@@ -9,6 +9,26 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
 
   <style>
+
+  	table {
+	  border-collapse: collapse;
+	  width: 100%;
+	}
+
+
+  	tr:hover { background: #c5d5ed; }
+	td, th { 
+	    border: 1px solid black; 
+	    text-align: left;
+        padding: 8px;
+	}
+
+	th {
+		background: #d9e6fa;
+	}
+
+	td {		cursor: pointer;}
+
   	#draggable1 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
   	#draggable2 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
   	#draggable3 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
@@ -80,13 +100,23 @@
 
   	var numInitialSkills = 0
 
+  	var charAge = 0
+  	var charName = ""
+
   	var charSkills = {}
+
+  	// variable which controls pre education entry modifiers
+  	var totalPreEducationRoll = 0
+  	var preEducationField = ''
 
     // TODO: disable clicking tabs to open acordion
 
   	$( function() {
   		// Setup accordion
-      $( "#accordion" ).accordion();
+      $( "#accordion" ).accordion({
+      	collapsible:true,
+      	heightStyle: "content"
+      });
     } );
 
     function changeActiveAccordion(newTab) {
@@ -230,25 +260,18 @@
 
     function setCharacteristics() {
       // Lock in the characteristics
+
+      // Sets the target number of skills on next tab, disables button until correct number selected
       numInitialSkills = 3 + charEduMod
-
       numberValidSkills()
-
+      
+      // update text on starting skills slide
       var div = document.getElementById("startingSkills")
       div.innerHTML = "You can pick " + numInitialSkills + " skills due to your education."
 
-      div = document.getElementById("character-str")
-      div.innerHTML = charStr + " (" + charStrMod + ")"
-      div = document.getElementById("character-dex")
-      div.innerHTML = charDex + " (" + charDexMod + ")"
-      div = document.getElementById("character-end")
-      div.innerHTML = charEnd + " (" + charEndMod + ")"
-      div = document.getElementById("character-int")
-      div.innerHTML = charInt + " (" + charIntMod + ")"
-      div = document.getElementById("character-edu")
-      div.innerHTML = charEdu + " (" + charEduMod + ")"
-      div = document.getElementById("character-soc")
-      div.innerHTML = charSoc + " (" + charSocMod + ")"
+
+      // write Characteristics to sheet
+      writeCharacteristics()
       
     }
 
@@ -261,6 +284,10 @@
       }
 
       writeSkills()
+
+      charAge = 18
+      writeAge()
+
     }
 
     function numberValidSkills() {
@@ -283,6 +310,34 @@
       document.getElementById("character-skills").innerHTML = skillsText
     }
 
+    function writeCharacteristics() {
+      // Write characteristics to character sheet
+      div = document.getElementById("character-str")
+      div.innerHTML = charStr + " (" + charStrMod + ")"
+      div = document.getElementById("character-dex")
+      div.innerHTML = charDex + " (" + charDexMod + ")"
+      div = document.getElementById("character-end")
+      div.innerHTML = charEnd + " (" + charEndMod + ")"
+      div = document.getElementById("character-int")
+      div.innerHTML = charInt + " (" + charIntMod + ")"
+      div = document.getElementById("character-edu")
+      div.innerHTML = charEdu + " (" + charEduMod + ")"
+      div = document.getElementById("character-soc")
+      div.innerHTML = charSoc + " (" + charSocMod + ")"
+    }
+
+    function writeAge() {
+      div = document.getElementById("character-age")
+      div.innerHTML = charAge
+    }
+
+    function writeAllFields() {
+    	// General purpose writing of all character stats
+    	writeSkills()
+    	writeCharacteristics()
+    	writeAge()
+    }
+
     function findInitialSkills() {
     	var selectedSkills = []
 
@@ -294,6 +349,7 @@
     	if (document.getElementById("chkDrive").checked) {selectedSkills.push("Drive")}
     	if (document.getElementById("chkElectronics").checked) {selectedSkills.push("Electronics")}
     	if (document.getElementById("chkFlyer").checked) {selectedSkills.push("Flyer")}
+    	if (document.getElementById("chkLanguage").checked) {selectedSkills.push("Language")}
     	if (document.getElementById("chkMechanic").checked) {selectedSkills.push("Mechanic")}
     	if (document.getElementById("chkMedic").checked) {selectedSkills.push("Medic")}
     	if (document.getElementById("chkProfession").checked) {selectedSkills.push("Profession")}
@@ -306,6 +362,151 @@
     	return selectedSkills
     }
 
+    function updatePreCareerEdu() {
+      // Update the pre career education page with correct DMs
+
+      // University
+      var uniDM = 0
+      var uniDMStr = ""
+      if (charAge == 22) {uniDM -= 1; uniDMStr += "-1 second term, "}
+      if (charAge == 26) {uniDM -= 2; uniDMStr += "-2 third term, "}
+      if (charSoc >= 9) {uniDM += 1; uniDMStr += "+1 Social Standing >= 9, "}
+
+      if (uniDM >= 0) {
+      	uniDM = "(DM +" + uniDM + ")"
+      } else {
+      	uniDM = "(DM " + uniDM + ")"
+      }
+      uniSpan = document.getElementById("university-entry-dm")
+      uniSpan.innerHTML = uniDM
+      uniSpan.title = uniDMStr.slice(0, -2)
+
+      // Army/navy/marine Academy
+      var acadDM = 0
+      var acadDMStr = ""
+      if (charAge == 22) {acadDM -= 2; acadDMStr += "-2 second term, "}
+      if (charAge == 26) {acadDM -= 4; acadDMStr += "-4 third term, "}
+
+      if (acadDM >= 0) {
+      	acadDM = "(DM +" + acadDM + ")"
+      } else {
+      	acadDM = "(DM " + acadDM + ")"
+      }
+      acadSpan = document.getElementById("army-acad-entry-dm")
+      acadSpan.innerHTML = acadDM
+      acadSpan.title = acadDMStr.slice(0, -2)
+      acadSpan = document.getElementById("marine-acad-entry-dm")
+      acadSpan.innerHTML = acadDM
+      acadSpan.title = acadDMStr.slice(0, -2)
+      acadSpan = document.getElementById("navy-acad-entry-dm")
+      acadSpan.innerHTML = acadDM
+      acadSpan.title = acadDMStr.slice(0, -2)
+
+    }
+
+    function setupPreEducationRoll(field) {
+
+    	document.getElementById("pre-career-table").hidden = true
+    	document.getElementById("pre-edu-roll-for-entry").hidden = false
+
+    	var textSpan = document.getElementById("pre-edu-text")
+    	if (field == 'university') {
+
+			var uniDM = 0
+			if (charAge == 22) {uniDM -= 1}
+			if (charAge == 26) {uniDM -= 2}
+			if (charSoc >= 9) {uniDM += 1}
+
+    		message = "To enter university you need to roll EDU 7+. This is calculated by rolling two dice, adding your education modifier ("
+			message += charEduMod
+    		message += "), then adding your dice modifiers ("
+    		message += uniDM + ")"
+    		textSpan.innerHTML = message
+
+    		totalPreEducationMod = charEduMod + uniDM
+    		preEducationField = 'university'
+    	}
+    	if (field == 'army') {
+
+			var uniDM = 0
+			if (charAge == 22) {uniDM -= 2}
+			if (charAge == 26) {uniDM -= 4}
+
+    		message = "To enter Army Military Academy you need to roll END 8+. This is calculated by rolling two dice, adding your endurance modifier ("
+			message += charEndMod
+    		message += "), then adding your dice modifiers ("
+    		message += uniDM + ")"
+    		textSpan.innerHTML = message
+
+    		totalPreEducationMod = charEndMod + uniDM
+    		preEducationField = 'army'
+    	}
+    	if (field == 'marines') {
+
+			var uniDM = 0
+			if (charAge == 22) {uniDM -= 2}
+			if (charAge == 26) {uniDM -= 4}
+
+    		message = "To enter Marine Military Academy you need to roll END 9+. This is calculated by rolling two dice, adding your endurance modifier ("
+			message += charEndMod
+    		message += "), then adding your dice modifiers ("
+    		message += uniDM + ")"
+    		textSpan.innerHTML = message
+
+    		totalPreEducationMod = charEndMod + uniDM
+    		preEducationField = 'marines'
+    	}
+    	if (field == 'navy') {
+
+			var uniDM = 0
+			if (charAge == 22) {uniDM -= 2}
+			if (charAge == 26) {uniDM -= 4}
+
+    		message = "To enter Navy Military Academy you need to roll INT 9+. This is calculated by rolling two dice, adding your intelligence modifier ("
+			message += charIntMod
+    		message += "), then adding your dice modifiers ("
+    		message += uniDM + ")"
+    		textSpan.innerHTML = message
+
+    		totalPreEducationMod = charIntMod + uniDM
+    		preEducationField = 'navy'
+    	}
+    }
+
+    function PreEducationRoll() {
+
+    	if (preEducationField == 'university') {target = 7}
+    	if (preEducationField == 'army') {target = 8}
+    	if (preEducationField == 'marines') {target = 9}
+    	if (preEducationField == 'navy') {target = 9}
+
+
+    	result = twoDice()
+    	document.getElementById("btn-roll-entry-pre-edu").disabled = true
+
+    	if (result + totalPreEducationMod >= target) {
+    		var message = "You rolled " + result +", add " + totalPreEducationMod + " = " + (result+totalPreEducationMod)
+    		message += "<br> You've successfully entered pre-education."
+    		document.getElementById("pre-edu-entry-result").innerHTML = message
+    		document.getElementById("btn-enter-pre-edu").hidden = false
+    	} else {
+    		var message = "You rolled " + result +", add " + totalPreEducationMod + " = " + (result+totalPreEducationMod)
+    		message += "<br> You've failed to enter pre-education."
+    		document.getElementById("pre-edu-entry-result").innerHTML = message
+    		document.getElementById("btn-continue-career").hidden = false
+    	}
+    }
+
+    function resetPreEducationPage() {
+
+    	document.getElementById("pre-career-table").hidden = false
+    	document.getElementById("pre-edu-roll-for-entry").hidden = true
+    	document.getElementById("btn-roll-entry-pre-edu").disabled = false
+    	document.getElementById("btn-enter-pre-edu").hidden = true
+    	document.getElementById("btn-continue-career").hidden = true
+    	document.getElementById("pre-edu-entry-result").innerHTML = ""
+    	document.getElementById("pre-edu-text").innerHTML = ""
+    }
 
     $( function() {
       $( document ).tooltip();
@@ -391,7 +592,7 @@
     <p>
   	  Every person and creature in Traveller has several characteristics that describe their base mental and physical potential. These 
   	  are determined by rolling two D6, six different times, to generate six scores. You can then choose which of these values to apply to 
-  	  each statistic.
+  	  each statistic. These characteristics may change later during character creation.
     </p>
     <p>
       A value of 7 is considered average, with 2 being the lowest possible value and 12 being the highest. As we roll two dice, extreme 
@@ -507,7 +708,7 @@
   		<li title="Vacc Suit: The Vacc Suit skill allows a Traveller to wear and operate spacesuits and environmental suits. A Traveller will rarely need to make Vacc Suit checks under ordinary circumstances – merely possessing the skill is enough. If the Traveller does not have the requisite Vacc Suit skill for the suit he is wearing, he suffers DM-2 to all skill checks made while wearing a suit for each missing level. This skill also permits the character to operate advanced battle armour."><input onclick="numberValidSkills()" type="checkbox" id="chkVaccSuit" value="Vacc Suit" /> Vacc Suit 0</li>
   	</ul>
 
-    <br />
+    <br>
     <br />
 
   	<button id="confirmSkills" onclick="changeActiveAccordion(3); setInitialSkills()">Continue</button>
@@ -519,28 +720,152 @@
   	<p>
   		Next, your Traveller engages in one or more career terms, representing their previous experiences and adventures before the start 
   		of the campaign. Each career term lasts for four years, even if a Traveller fails a Survival roll or is forced to leave a career. 
-  		At many points during a career, a Traveller will have to make a dice roll of some sort.
-  	</p> 
-  	<p>
-  		Most of these rolls are based on characteristics – simply roll 2D, add the DM from the listed characteristic, and try to get a 
-  		total higher than or equal to the listed value. So, a roll of INT 8+ means ‘roll 2D, add your Intellect DM, and you succeed if you
-  		roll an 8 or more’. 
+  		At many points during a career, a Traveller will have to make a dice roll of some sort. Most of these rolls are based on 
+  		characteristics – simply roll 2D, add the DM from the listed characteristic, and try to get a total higher than or equal to the 
+  		listed value. So, a roll of INT 8+ means ‘roll 2D, add your Intellect DM, and you succeed if you roll an 8 or more’. 
   	</p>
   	<p>
   		In each career, there are three assignments, representing different aspects of the career. Pick one of these assignments when you 
-  		enter the career. 
+  		enter the career. For example under the Rogue career there are the assignments Thief, Enforcer or Pirate.
   	</p>
   	<p>
-  		
+  		You can also choose to enter either University or Military Academy instead during your first, second or third term. If you fail entry
+  		during your first term you can try again in your second or third, however the dice roll gets harder in each subsequent year. If you
+  		fail to qualify you then attempt to join a career as normal. Attending university or Military Academy provides the chance to gain 
+  		increases to your Education characteristic, as well as skills, bonuses to rolls to qualify for other careers, and the chance to roll
+  		for commission before the first term of a military career, entering as an officer.
+  	</p>
+  	<p>
+  		Also, keep track of your age. After you turn 34 there is a small but increasing chance each term that you will lose points in one or
+  		more characteristics.
   	</p>
 
-  	<button onclick="changeActiveAccordion(4)">Continue</button>
+  	<h3> Career checklist </h3>
+
+  	<ul>
+  		<li>
+  		  First, if it's in the first three terms, decide whether or not to apply University or Military Academy, and roll to see if you succeed
+  		  in qualifying. If unsuccesful apply for a career as normal, otherwise choose which skills you learn, roll for events, and then roll for
+  		  graduation. After your University/Military Academy proceed to the next term.
+  		</li>
+  		<li> If not entering pre-career education, pick which career you would like to apply for. If this is your first time in this career, roll 
+  			to qualify. If you fail to qualify either choose the drifter career or enter the draft to be randomly assigned a military career (You
+  			may only enter the draft once in your lifetime).
+  		</li>
+  		<li>
+  			Each career has four or five types of skill table associated with it – Personal Development, Service Skills, Specialist Skills, officer
+  			skills and Advanced Education. In each term you spend in a career, pick one of these tables and roll 1D to see which skill you increase.
+  			If this is your first career you gain basic training in all of the service skills at level 0. In the first term of subsequent careers 
+  			you pick only one service skill.
+  		</li>
+  		<li>
+  		    Next roll the survival check to see if you suffer a mishap and are forced to leave your career. Assuming you don't, roll the event check
+  		    to see what interesting thing befalls you.
+  		</li>
+  		<li>
+  			If you are in a military career, you can then roll for commission to become a rank 1 officer, allowing access to the officer tables. If
+  			your social standing is below 9 you may only roll for commission in your first term.
+  		</li>
+  		<li>
+  			Every career has a mandatory roll for advancement, which is different to the commission. If you make a successful advancement roll you gain
+  			a rank in the career and get an extra roll on any of the skills and training tables as well as any bonuses listed. However, if your 
+  			advancement roll is equal to or less than the number of terms you have spent in this career, then you cannot continue in this career after 
+  			this term. Either your services are no longer required, or events have caused you to leave, or perhaps you are simply bored and want a new 
+  			challenge. If you roll a natural 12, then you must continue in this career. You are too valuable to lose and will be strong-armed into 
+  			staying.
+  		</li>
+  		<li>
+  			Finally, decide whether to continue to the next term or finish character creation. When you leave a career for any reason, you gain material
+  			benefits from that career, representing money, equipment and influence acquired during your years of work. There are two tables for this in
+  			each career – Cash and Benefits. You may only roll on Cash tables a maximum of three times in your lifetime, regardless of how many careers 
+  			or Benefit rolls you accumulate. You receive one Benefit roll per full term served. Leaving due to a mishap means you lose the Benefit roll 
+  			for that term, but you still gain the benefit rolls for previous terms in that career. If you reached rank 1 or 2, you get an extra Benefit 
+  			roll when leaving that career. If you reached rank 3 or 4, you get two extra Benefit rolls, and if you reached rank 5 or 6, you get three 
+  			extra Benefit rolls and may also apply DM+1 to all rolls on the Cash and Benefits tables. 
+  		</li>
+
+
+  	</ul>
+
+  	<button onclick="changeActiveAccordion(4); updatePreCareerEdu()">Continue</button>
   </div>
 
-  <h3>section 5</h3>
+  <h3>Select pre-career education</h3>
+  <div>
+  	<p>
+  	  As it's one of the first three terms for your character, you can choose to enroll in pre-career education. Select an option below or skip for now.
+  	  Shown in grey are the dice modifiers (DM) affecting the roll. 
+    </p>
+    <p>
+  	  Hover over the <span style="color: #f59f02">orange text </span> for more information.
+  	</p>
+  	<br><br><br>
+
+	<table id="pre-career-table">
+        <tr>
+	      <th>Pre-career Education</th>
+	      <th>Entry Roll</th>
+	      <th>Entry Benefits</th>
+	      <th>Graduation Roll</th>
+	      <th>Graduation Benefits</th>
+	    </tr>
+	    <tr onclick="setupPreEducationRoll('university')">
+	      <td>University</td>
+	      <td>EDU 7+  <span style="color: #f59f02" id="university-entry-dm"></span> </td>
+	      <td>+1 to EDU, one lvl 0 and one lvl 1 skill from <span style="color: #f59f02" title="Admin, Advocate, Animals, Art, Astrogation, Electronics, Engineer, Language, Medic, Navigation, Profession, Science">this list.</span></td>
+	      <td>INT 7+ (11+ w/ honors)</td>
+	      <td>+2 to EDU, chosen skills increase to lvl 1 and lvl 2, DM+1 (DM+2 w/ honors) when applying for <span style="color: #f59f02" title="Agent, Army, Citizen (corporate), Entertainer (journalist), Marines, Navy, Scholar, Scouts.">these jobs.</span> Can roll for commision before 1st term of military career (DM+2 if w/ honors).</td>
+	    </tr>
+	    <tr onclick="setupPreEducationRoll('army')">
+	      <td>Military Academy - Army</td>
+	      <td>END 8+ <span style="color: #f59f02" id="army-acad-entry-dm"></span> </td>
+	      <td>Gain all of <span style="color: #f59f02" title="Drive/Vacc suit 0, Athletics 0, Gun Combat 0, Recon 0, Melee 0, Heavy Weapons 0.">these skills.</span></td>
+	      <td>INT 8+ (11+ w/ honors)</td>
+	      <td>+1 to EDU, (+1 to SOC w/ honors), automatic entry into the Army, increase 3 entry skills to lvl 1 if joining the Army, can roll for commision before 1st term of military career (automatic success w/ honors).</td>
+	    </tr>
+	    <tr onclick="setupPreEducationRoll('marines')">
+	      <td>Military Academy - Marines</td>
+	      <td>END 9+ <span style="color: #f59f02" id="marine-acad-entry-dm"></span> </td>
+	      <td>Gain all of <span style="color: #f59f02" title="Vacc Suit 0, Athletics 0, Gun Combat 0, Tactics 0, Heavy Weapons 0, Stealth 0.">these skills.</span></td>
+	      <td>INT 8+ (11+ w/ honors)</td>
+	      <td>+1 to EDU, (+1 to SOC w/ honors), automatic entry into the Marines, increase 3 entry skills to lvl 1 if joining the Marines, can roll for commision before 1st term of military career (automatic success w/ honors).</td>
+	    </tr>
+	    <tr onclick="setupPreEducationRoll('navy')">
+	      <td>Military Academy - Navy</td>
+	      <td>INT 9+ <span style="color: #f59f02" id="navy-acad-entry-dm"></span> </td>
+	      <td>Gain all of <span style="color: #f59f02" title="Pilot 0, Vacc Suit 0, Athletics 0, Gunner 0, Mechanic 0, Gun Combat 0.">these skills.</span></td>
+	      <td>INT 8+ (11+ w/ honors)</td>
+	      <td>+1 to EDU, (+1 to SOC w/ honors), automatic entry into the Navy, increase 3 entry skills to lvl 1 if joining the Navy, can roll for commision before 1st term of military career (automatic success w/ honors).</td>
+	    </tr>
+	    <tr onclick="changeActiveAccordion(6)">
+	      <td colspan="5">Skip pre-career education for now </td>
+	    </tr>
+
+	</table>
+
+	<div id="pre-edu-roll-for-entry" hidden=true>
+		<p>
+			<span id="pre-edu-text"></span><br>
+			<button id="btn-roll-entry-pre-edu" onclick="PreEducationRoll()">Roll dice</button><br>
+			<span id="pre-edu-entry-result"></span>
+			<button id="btn-enter-pre-edu" hidden=true onclick="changeActiveAccordion(7); resetPreEducationPage()">Enter pre-education</button><br>
+			<button id="btn-continue-career" hidden=true onclick="changeActiveAccordion(6); resetPreEducationPage()">Continue to careers</button><br>
+
+		</p>
+	</div>
+
+  </div>
+
+  <h3>Pre-career education</h3>
   <div>
 
-  	<button onclick="changeActiveAccordion(0)">Continue</button>
+  	<button onclick="changeActiveAccordion(7)">Finish</button>
+  </div>
+
+  <h3>section 7</h3>
+  <div>
+
+  	<button onclick="changeActiveAccordion(false)">Finish</button>
   </div>
 </div>
 
