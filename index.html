@@ -1,892 +1,623 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Mongoose Traveller 2nd Edition</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
-
-  <style>
-
-  	table {
-	  border-collapse: collapse;
-	  width: 100%;
-	}
-
-
-  	tr:hover { background: #c5d5ed; }
-	td, th { 
-	    border: 1px solid black; 
-	    text-align: left;
-        padding: 8px;
-	}
-
-	th {
-		background: #d9e6fa;
-	}
-
-	td {		cursor: pointer;}
-
-  	#draggable1 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
-  	#draggable2 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
-  	#draggable3 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
-  	#draggable4 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
-  	#draggable5 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
-  	#draggable6 { width: 40px; height: 30px; padding-top: 12px; margin: 2px; float: left; text-align:center; background-color:lightblue; border-style: dashed;}
-
-  	#droppable1 { width: 50px; height: 50px; float:left; text-align:center;}
-  	#droppable2 { width: 50px; height: 50px; float:left; text-align:center;}
-  	#droppable3 { width: 50px; height: 50px; float:left; text-align:center;}
-  	#droppable4 { width: 50px; height: 50px; float:left; text-align:center;}
-  	#droppable5 { width: 50px; height: 50px; float:left; text-align:center;}
-  	#droppable6 { width: 50px; height: 50px; float:left; text-align:center;}
-
-  	#column-content {
-      display: inline-block;
-    }
-    #diceTray {
-      display: inline-block;
-    }
-  	#description {
-  	  padding-top: 15px;
-  	  padding-left: 10px;
-	  display: inline-block;
-	  vertical-align: middle;
-	}
-
-    .checkbox-grid li {
-      display: block;
-      float: left;
-      width: 50%;
-    }
-
-    .tooltip {
-      position: relative;
-	  display: inline-block;
-	  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-	}
-
-	/* Tooltip text */
-	.tooltip .tooltiptext {
-	  visibility: hidden;
-	  width: 120px;
-	  background-color: black;
-	  color: #fff;
-	  text-align: center;
-	  padding: 5px 0;
-	  border-radius: 6px;
-
-	}
-
-  </style>
-
-  <script>
-
-  	var charStr = 0
-  	var charDex = 0
-  	var charEnd = 0
-  	var charInt = 0
-  	var charEdu = 0
-  	var charSoc = 0
-
-  	var charStrMod = 0
-  	var charDexMod = 0
-  	var charEndMod = 0
-  	var charIntMod = 0
-  	var charEduMod = 0
-  	var charSocMod = 0
-
-  	var numInitialSkills = 0
-
-  	var charAge = 0
-  	var charName = ""
-
-  	var charSkills = {}
-
-  	// variable which controls pre education entry modifiers
-  	var totalPreEducationRoll = 0
-  	var preEducationField = ''
-
-    // TODO: disable clicking tabs to open acordion
-
-  	$( function() {
-  		// Setup accordion
-      $( "#accordion" ).accordion({
-      	collapsible:true,
-      	heightStyle: "content"
-      });
-    } );
-
-    function changeActiveAccordion(newTab) {
-    	// Function to change the accordion to a specific tab
-    	$( "#accordion" ).accordion( "option", "active", newTab);
-    };
-
-    function determineModifier(characteristic) {
-    	switch(characteristic) {
-      	  case 2:
-      	    return -2
-      	    break
-      	  case 3:
-      	  case 4:
-      	  case 5:
-      	    return -1
-      	    break
-      	  case 6:
-      	  case 7:
-      	  case 8:
-      	    return 0
-      	    break
-      	  case 9:
-      	  case 10:
-      	  case 11:
-      	    return 1
-      	    break
-      	  case 12:
-      	    return 2
-      	}
-    }
-
-    function diceToColour(diceRoll) {
-    	// Function to pick the colours of dice, red indicating a bad roll up to green as a good roll
-    	switch(diceRoll) {
-    	  case 2:
-      	    return '#fb6a4a'
-      	    break
-      	  case 3:
-      	  case 4:
-      	  case 5:
-      	    return '#f5c9b8'
-      	    break
-      	  case 6:
-      	  case 7:
-      	  case 8:
-      	    return '#edf8fb'
-      	    break
-      	  case 9:
-      	  case 10:
-      	  case 11:
-      	    return '#b2e2e2'
-      	    break
-      	  case 12:
-      	    return '#66c2a4'
-    	}
-    }
-
-     function twoDice() {
-      // Simulates rolling two 6 sided dice.
-      return 2 + Math.floor(Math.random()*6) + Math.floor(Math.random()*6);
-    };
-
-
-    function rollDice() {
-      // Generate 6 values for characteristics, then create draggable divs.
-
-      
-	  var dice1 = document.createElement("div");
-	  dice1.id = "draggable1";
-	  dice1.addClass = "ui-widget-content";
-	  var characteristicScore = twoDice()
-      dice1.appendChild(
-      	document.createTextNode(characteristicScore)
-      );
-      dice1.style.backgroundColor = diceToColour(characteristicScore)
-      document.getElementById("diceTray").appendChild(dice1)
-
-      var dice2 = document.createElement("div");
-	  dice2.id = "draggable2";
-	  dice2.addClass = "ui-widget-content";
-      var characteristicScore = twoDice()
-      dice2.appendChild(
-      	document.createTextNode(characteristicScore)
-      );
-      dice2.style.backgroundColor = diceToColour(characteristicScore)
-      document.getElementById("diceTray").appendChild(dice2)
-
-      var dice3 = document.createElement("div");
-	  dice3.id = "draggable3";
-	  dice3.addClass = "ui-widget-content";
-      var characteristicScore = twoDice()
-      dice3.appendChild(
-      	document.createTextNode(characteristicScore)
-      );
-      dice3.style.backgroundColor = diceToColour(characteristicScore)
-      document.getElementById("diceTray").appendChild(dice3)
-
-      var dice4 = document.createElement("div");
-	  dice4.id = "draggable4";
-	  dice4.addClass = "ui-widget-content";
-      var characteristicScore = twoDice()
-      dice4.appendChild(
-      	document.createTextNode(characteristicScore)
-      );
-      dice4.style.backgroundColor = diceToColour(characteristicScore)
-      document.getElementById("diceTray").appendChild(dice4)
-
-      var dice5 = document.createElement("div");
-	  dice5.id = "draggable5";
-	  dice5.addClass = "ui-widget-content";
-      var characteristicScore = twoDice()
-      dice5.appendChild(
-      	document.createTextNode(characteristicScore)
-      );
-      dice5.style.backgroundColor = diceToColour(characteristicScore)
-      document.getElementById("diceTray").appendChild(dice5)
-
-      var dice6 = document.createElement("div");
-	  dice6.id = "draggable6";
-	  var characteristicScore = twoDice()
-      dice6.appendChild(
-      	document.createTextNode(characteristicScore)
-      );
-      dice6.style.backgroundColor = diceToColour(characteristicScore)
-      document.getElementById("diceTray").appendChild(dice6)
-
-      // set all draggable elements to be draggable
-	  $( "#draggable1" ).draggable({ revert: "invalid" })
-	  $( "#draggable2" ).draggable({ revert: "invalid" })
-	  $( "#draggable3" ).draggable({ revert: "invalid" })
-	  $( "#draggable4" ).draggable({ revert: "invalid" })
-	  $( "#draggable5" ).draggable({ revert: "invalid" })
-	  $( "#draggable6" ).draggable({ revert: "invalid" })
-
-
-      document.getElementById("confirmCharacteristics").disabled = false
-      document.getElementById("rollDiceButton").disabled = true
-    };
-
-
-    function setCharacteristics() {
-      // Lock in the characteristics
-
-      // Sets the target number of skills on next tab, disables button until correct number selected
-      numInitialSkills = 3 + charEduMod
-      numberValidSkills()
-      
-      // update text on starting skills slide
-      var div = document.getElementById("startingSkills")
-      div.innerHTML = "You can pick " + numInitialSkills + " skills due to your education."
-
-
-      // write Characteristics to sheet
-      writeCharacteristics()
-      
-    }
-
-    function setInitialSkills() {
-      // Lock in initial skills
-      var selectedSkills = findInitialSkills()
-
-      for (var i = 0; i < selectedSkills.length; i++) {
-      	charSkills[selectedSkills[i]] = 0
-      }
-
-      writeSkills()
-
-      charAge = 18
-      writeAge()
-
-    }
-
-    function numberValidSkills() {
-    	// Check that the number of selected skills is correct
-    	var selectedSkills = findInitialSkills()
-    	if (selectedSkills.length == numInitialSkills) {
-    		document.getElementById("confirmSkills").disabled = false
-    	} else {
-    		document.getElementById("confirmSkills"). disabled = true
-    	}
-
-    }
-
-    function writeSkills() {
-      // Write the skills to the character sheet
-      var skillsText = ""
-      for (skill in charSkills) {
-      	skillsText += skill + " " + charSkills[skill] + "<br />"
-      }
-      document.getElementById("character-skills").innerHTML = skillsText
-    }
-
-    function writeCharacteristics() {
-      // Write characteristics to character sheet
-      div = document.getElementById("character-str")
-      div.innerHTML = charStr + " (" + charStrMod + ")"
-      div = document.getElementById("character-dex")
-      div.innerHTML = charDex + " (" + charDexMod + ")"
-      div = document.getElementById("character-end")
-      div.innerHTML = charEnd + " (" + charEndMod + ")"
-      div = document.getElementById("character-int")
-      div.innerHTML = charInt + " (" + charIntMod + ")"
-      div = document.getElementById("character-edu")
-      div.innerHTML = charEdu + " (" + charEduMod + ")"
-      div = document.getElementById("character-soc")
-      div.innerHTML = charSoc + " (" + charSocMod + ")"
-    }
-
-    function writeAge() {
-      div = document.getElementById("character-age")
-      div.innerHTML = charAge
-    }
-
-    function writeAllFields() {
-    	// General purpose writing of all character stats
-    	writeSkills()
-    	writeCharacteristics()
-    	writeAge()
-    }
-
-    function findInitialSkills() {
-    	var selectedSkills = []
-
-    	if (document.getElementById("chkAdmin").checked) {selectedSkills.push("Admin")}
-    	if (document.getElementById("chkAnimals").checked) {selectedSkills.push("Animals")}
-    	if (document.getElementById("chkArt").checked) {selectedSkills.push("Art")}
-    	if (document.getElementById("chkAthletics").checked) {selectedSkills.push("Athletics")}
-    	if (document.getElementById("chkCarouse").checked) {selectedSkills.push("Carouse")}
-    	if (document.getElementById("chkDrive").checked) {selectedSkills.push("Drive")}
-    	if (document.getElementById("chkElectronics").checked) {selectedSkills.push("Electronics")}
-    	if (document.getElementById("chkFlyer").checked) {selectedSkills.push("Flyer")}
-    	if (document.getElementById("chkLanguage").checked) {selectedSkills.push("Language")}
-    	if (document.getElementById("chkMechanic").checked) {selectedSkills.push("Mechanic")}
-    	if (document.getElementById("chkMedic").checked) {selectedSkills.push("Medic")}
-    	if (document.getElementById("chkProfession").checked) {selectedSkills.push("Profession")}
-    	if (document.getElementById("chkScience").checked) {selectedSkills.push("Science")}
-    	if (document.getElementById("chkSeafarer").checked) {selectedSkills.push("Seafarer")}
-    	if (document.getElementById("chkStreetwise").checked) {selectedSkills.push("Streetwise")}
-    	if (document.getElementById("chkSurvival").checked) {selectedSkills.push("Survival")}
-    	if (document.getElementById("chkVaccSuit").checked) {selectedSkills.push("Vacc Suit")}
-
-    	return selectedSkills
-    }
-
-    function updatePreCareerEdu() {
-      // Update the pre career education page with correct DMs
-
-      // University
-      var uniDM = 0
-      var uniDMStr = ""
-      if (charAge == 22) {uniDM -= 1; uniDMStr += "-1 second term, "}
-      if (charAge == 26) {uniDM -= 2; uniDMStr += "-2 third term, "}
-      if (charSoc >= 9) {uniDM += 1; uniDMStr += "+1 Social Standing >= 9, "}
-
-      if (uniDM >= 0) {
-      	uniDM = "(DM +" + uniDM + ")"
-      } else {
-      	uniDM = "(DM " + uniDM + ")"
-      }
-      uniSpan = document.getElementById("university-entry-dm")
-      uniSpan.innerHTML = uniDM
-      uniSpan.title = uniDMStr.slice(0, -2)
-
-      // Army/navy/marine Academy
-      var acadDM = 0
-      var acadDMStr = ""
-      if (charAge == 22) {acadDM -= 2; acadDMStr += "-2 second term, "}
-      if (charAge == 26) {acadDM -= 4; acadDMStr += "-4 third term, "}
-
-      if (acadDM >= 0) {
-      	acadDM = "(DM +" + acadDM + ")"
-      } else {
-      	acadDM = "(DM " + acadDM + ")"
-      }
-      acadSpan = document.getElementById("army-acad-entry-dm")
-      acadSpan.innerHTML = acadDM
-      acadSpan.title = acadDMStr.slice(0, -2)
-      acadSpan = document.getElementById("marine-acad-entry-dm")
-      acadSpan.innerHTML = acadDM
-      acadSpan.title = acadDMStr.slice(0, -2)
-      acadSpan = document.getElementById("navy-acad-entry-dm")
-      acadSpan.innerHTML = acadDM
-      acadSpan.title = acadDMStr.slice(0, -2)
-
-    }
-
-    function setupPreEducationRoll(field) {
-
-    	document.getElementById("pre-career-table").hidden = true
-    	document.getElementById("pre-edu-roll-for-entry").hidden = false
-
-    	var textSpan = document.getElementById("pre-edu-text")
-    	if (field == 'university') {
-
-			var uniDM = 0
-			if (charAge == 22) {uniDM -= 1}
-			if (charAge == 26) {uniDM -= 2}
-			if (charSoc >= 9) {uniDM += 1}
-
-    		message = "To enter university you need to roll EDU 7+. This is calculated by rolling two dice, adding your education modifier ("
-			message += charEduMod
-    		message += "), then adding your dice modifiers ("
-    		message += uniDM + ")"
-    		textSpan.innerHTML = message
-
-    		totalPreEducationMod = charEduMod + uniDM
-    		preEducationField = 'university'
-    	}
-    	if (field == 'army') {
-
-			var uniDM = 0
-			if (charAge == 22) {uniDM -= 2}
-			if (charAge == 26) {uniDM -= 4}
-
-    		message = "To enter Army Military Academy you need to roll END 8+. This is calculated by rolling two dice, adding your endurance modifier ("
-			message += charEndMod
-    		message += "), then adding your dice modifiers ("
-    		message += uniDM + ")"
-    		textSpan.innerHTML = message
-
-    		totalPreEducationMod = charEndMod + uniDM
-    		preEducationField = 'army'
-    	}
-    	if (field == 'marines') {
-
-			var uniDM = 0
-			if (charAge == 22) {uniDM -= 2}
-			if (charAge == 26) {uniDM -= 4}
-
-    		message = "To enter Marine Military Academy you need to roll END 9+. This is calculated by rolling two dice, adding your endurance modifier ("
-			message += charEndMod
-    		message += "), then adding your dice modifiers ("
-    		message += uniDM + ")"
-    		textSpan.innerHTML = message
-
-    		totalPreEducationMod = charEndMod + uniDM
-    		preEducationField = 'marines'
-    	}
-    	if (field == 'navy') {
-
-			var uniDM = 0
-			if (charAge == 22) {uniDM -= 2}
-			if (charAge == 26) {uniDM -= 4}
-
-    		message = "To enter Navy Military Academy you need to roll INT 9+. This is calculated by rolling two dice, adding your intelligence modifier ("
-			message += charIntMod
-    		message += "), then adding your dice modifiers ("
-    		message += uniDM + ")"
-    		textSpan.innerHTML = message
-
-    		totalPreEducationMod = charIntMod + uniDM
-    		preEducationField = 'navy'
-    	}
-    }
-
-    function PreEducationRoll() {
-
-    	if (preEducationField == 'university') {target = 7}
-    	if (preEducationField == 'army') {target = 8}
-    	if (preEducationField == 'marines') {target = 9}
-    	if (preEducationField == 'navy') {target = 9}
-
-
-    	result = twoDice()
-    	document.getElementById("btn-roll-entry-pre-edu").disabled = true
-
-    	if (result + totalPreEducationMod >= target) {
-    		var message = "You rolled " + result +", add " + totalPreEducationMod + " = " + (result+totalPreEducationMod)
-    		message += "<br> You've successfully entered pre-education."
-    		document.getElementById("pre-edu-entry-result").innerHTML = message
-    		document.getElementById("btn-enter-pre-edu").hidden = false
-    	} else {
-    		var message = "You rolled " + result +", add " + totalPreEducationMod + " = " + (result+totalPreEducationMod)
-    		message += "<br> You've failed to enter pre-education."
-    		document.getElementById("pre-edu-entry-result").innerHTML = message
-    		document.getElementById("btn-continue-career").hidden = false
-    	}
-    }
-
-    function resetPreEducationPage() {
-
-    	document.getElementById("pre-career-table").hidden = false
-    	document.getElementById("pre-edu-roll-for-entry").hidden = true
-    	document.getElementById("btn-roll-entry-pre-edu").disabled = false
-    	document.getElementById("btn-enter-pre-edu").hidden = true
-    	document.getElementById("btn-continue-career").hidden = true
-    	document.getElementById("pre-edu-entry-result").innerHTML = ""
-    	document.getElementById("pre-edu-text").innerHTML = ""
-    }
-
-    $( function() {
-      $( document ).tooltip();
-
-      $( "#droppable1" ).droppable({drop: function( event, ui ) {
-      	$( this ).addClass( "ui-state-highlight" )
-      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
-      	charStr = parseInt(ui.draggable[0].textContent)
-      	charStrMod = determineModifier(parseInt(ui.draggable[0].textContent))
-
-      }});
-
-      $( "#droppable2" ).droppable({drop: function( event, ui ) {
-      	$( this ).addClass( "ui-state-highlight" )
-      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
-      	charDex = parseInt(ui.draggable[0].textContent)
-      	charDexMod = determineModifier(parseInt(ui.draggable[0].textContent))
-
-      }});
-      $( "#droppable3" ).droppable({drop: function( event, ui ) {
-      	$( this ).addClass( "ui-state-highlight" )
-      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
-      	charEnd = parseInt(ui.draggable[0].textContent)
-      	charEndMod = determineModifier(parseInt(ui.draggable[0].textContent))
-      }
-      });
-      $( "#droppable4" ).droppable({drop: function( event, ui ) {
-      	$( this ).addClass( "ui-state-highlight" )
-      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
-      	charInt = parseInt(ui.draggable[0].textContent)
-      	charIntMod = determineModifier(parseInt(ui.draggable[0].textContent))
-      }
-      });
-      $( "#droppable5" ).droppable({drop: function( event, ui ) {
-      	$( this ).addClass( "ui-state-highlight" )
-      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
-      	charEdu = parseInt(ui.draggable[0].textContent)
-      	charEduMod = determineModifier(parseInt(ui.draggable[0].textContent))
-      }
-      });
-      $( "#droppable6" ).droppable({drop: function( event, ui ) {
-      	$( this ).addClass( "ui-state-highlight" )
-      	ui.draggable.position( { of: $(this), my: 'center', at: 'middle' } )
-      	charSoc = parseInt(ui.draggable[0].textContent)
-      	charSocMod = determineModifier(parseInt(ui.draggable[0].textContent))
-      }
-      });
-    } );
-
-  </script>
+	<meta charset="UTF-8">
+	<title>Traveller character creator</title>
+
+	<link rel="stylesheet" 
+	href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" 
+	integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" 
+	crossorigin="anonymous"/>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" 
+	integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" 
+	crossorigin="anonymous"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" 
+	integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" 
+	crossorigin="anonymous"></script>
+
+	<style>
+
+		:root {
+			--dark-grey:#444444;
+			--medium-grey:#737374;
+			--light-grey:#E7E7E8;
+			--orange-text:#D36B52;
+		}
+
+		.wrapper {
+			margin-right: auto;
+			margin-left:  auto;
+
+			max-width: 1200px;
+
+			padding-right: 10px;
+			padding-left:  10px;
+		}
+		.container {
+			height: 800px;
+			border: 3px solid var(--dark-grey);
+		}
+		/* Left pane with details of character */
+		.character-pane {
+			width: 25%;
+			height: 800px;
+			background: var(--dark-grey);
+			float: left;
+			text-align: center;
+		}
+		/* div wrapping the character attributes, skills */
+		.attributes-wrapper, .skills-wrapper {
+			padding-left: 4px;
+			padding-right: 4px;
+		}
+		/* Headers in the character pane */
+		.character-pane h1 {
+			color:var(--orange-text);
+		}
+		/* Names of attributes */
+		.character-pane p {
+			color:var(--orange-text);
+			text-align: left;
+			font-size:16px;
+		}
+		.draggable {
+			width: 40px; 
+			height: 30px; 
+			padding-top: 12px; 
+			margin: 2px; 
+			float: left; 
+			text-align:center; 
+			background-color:lightblue; 
+			border-style: dashed;
+			cursor: -webkit-grab;
+		}
+		/* Style for droppable for dice */
+		.droppable {
+			width: 40px; 
+			height: 30px; 
+			padding-top: 12px; 
+			margin: 2px;
+			float: left; 
+			text-align: center; 
+			background-color: var(--light-grey); 
+			border-style: dashed;
+		}
+		/* Style for dice modifier to the left of droppable */
+		.dicemod {
+			width: 40px; 
+			height: 30px; 
+			padding-top: 12px; 
+			margin: 2px;
+			float: left; 
+			text-align: center; 
+			background-color: var(--medium-grey); 
+			border-bottom: dashed;
+			border-top: dashed var(--medium-grey);
+		}
+
+
+		/* div wrapping the main interactive pane*/
+		.main-pane {
+			width: 75%;
+			height: 800px;
+			background: var(--light-grey);
+			float: left;
+		}
+		/* Style for the tabs in the main pane */
+		.main-pane-tab {
+			text-align: center;
+			padding-left: 60px;
+			padding-right: 60px;
+			padding-top: 6px;
+			padding-bottom: 6px;
+		}
+
+		/* for stacking content in lines */
+		.column-content {
+			display: inline-block;
+			width: 100%;
+		}
+
+		#dice-tray {
+			justify-content: center;
+			align-items: center;
+		}
+
+		#random-homeworld-field {
+			margin: 15px;
+			max-width: 100%;
+			min-height: 400px;
+			border-style: solid var(--medium-grey);
+		}
+
+		table {
+			border-collapse: collapse;
+			width: 90%;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		td, th {
+			border: 1px solid #dddddd;
+			text-align: center;
+		}
+
+		tr:nth-child(even) {
+			background-color: #dddddd;
+		}
+
+	</style>
+	<script>
+
+		// follows the rules for generating a random planet
+		class homeworld {
+			constructor() {
+
+				this.planetSize = twoDice() - 2
+				this.planetAtmosphere = Math.min(Math.max(twoDice() + this.planetSize - 7, 0), 15)
+
+				var tempMod = 0
+				var hydroMod = 0
+
+				// temperature based on atmosphere
+				if ([0,1,6,7].includes(this.planetAtmosphere)) {tempMod = 0}
+				else if ([2,3].includes(this.planetAtmosphere)) {tempMod = -2}
+				else if ([4,5,14].includes(this.planetAtmosphere)) {tempMod = -1}
+				else if ([8,9].includes(this.planetAtmosphere)) {tempMod = 1}
+				else if ([10,13,15].includes(this.planetAtmosphere)) {tempMod = 2}
+				else {tempMod = 6}
+
+				this.planetTemperature = twoDice() + tempMod
+
+				// hydrographics based on size, atmosphere and temp
+				if (this.planetSize <= 1) {
+					this.planetHydrographics = 0
+				} else {
+					//some atmospheres lower water
+					if ([0,1,10,11,12].includes(this.planetAtmosphere)) {hydroMod -= 4}
+
+					// if not very dense or unusual atmosphere
+					if (![13,15].includes(this.planetAtmosphere)) {
+						// less water on hot temps
+						if ([10,11].includes(this.planetTemperature)) {hydroMod -= 2}
+						if (this.planetTemperature >= 12) {hydroMod -= 6}
+					}
+
+					this.planetHydrographics = min(max(twoDice() + hydroMod - 7, 0), 10)
+				}
+				
+				this.planetPopulation = twoDice() - 2
+
+				// If there's no pop, no goverment, etc.
+				if (this.planetPopulation == 0) {
+					this.planetGovernment = 0
+					this.planetCulture = 0
+					this.planetLaw = 0
+				} else {
+					this.planetGovernment = min(max(twoDice() + this.planetPopulation - 7, 0), 15)
+					this.planetCulture = oneDice() + oneDice()*10
+					this.planetLaw = min(max(twoDice() + this.planetGovernment - 7, 0), 9)	
+				}
+
+				// Startport level
+				var starportMod = 0
+				if (this.planetPopulation >= 10) {starportMod = 2}
+				else if (this.planetPopulation >= 8) {starportMod = 1}
+				else if (this.planetPopulation <= 2) {starportMod = -2}
+				else if (this.planetPopulation <= 4) {starportMod = -1}
+				this.planetStarport = twoDice() + starportMod
+
+				// Planet Tech level, most complicated
+				if (this.planetPopulation == 0) {
+					this.planetTechLevel = 0 
+				} else {
+					var techMod = 0
+					var techMin = 0
+
+					// Atmosphere can affect the minimum tech level
+					if ([0,1,10,15].includes(this.planetAtmosphere)) {techMin = 8}
+					else if ([2,3,13,14].includes(this.planetAtmosphere)) {techMin = 5}
+					else if ([4,7,9].includes(this.planetAtmosphere)) {techMin = 3}
+					else if ([11].includes(this.planetAtmosphere)) {techMin = 9}
+					else if ([12].includes(this.planetAtmosphere)) {techMin = 10}
+
+					// Various modifiers based on other planet stats
+					if ([0,1].includes(this.planetSize)) {techMod += 2}
+					else if ([2,3,4].includes(this.planetSize)) {techMod += 1}
+					if ([0,1,2,3,10,11,12,13,14,15].includes(this.planetAtmosphere)) {techMod += 1}
+					if ([10].includes(this.planetHydrographics)) {techMod += 2}
+					else if ([0,9].includes(this.planetHydrographics)) {techMod += 1}
+					if ([1,2,3,4,5,8].includes(this.planetPopulation)) {techMod += 1}
+					else if ([9].includes(this.planetPopulation)) {techMod += 2}
+					else if ([10].includes(this.planetPopulation)) {techMod += 4}
+					if ([0,5].includes(this.planetGovernment)) {techMod += 1}
+					else if ([7].includes(this.planetGovernment)) {techMod += 2}
+					else if ([13,14].includes(this.planetGovernment)) {techMod -= 2}
+
+					if (this.planetStarport <= 2) {techMod -= 4}
+					else if ([7,8].includes(this.planetStarport)) {techMod += 2}
+					else if ([9,10].includes(this.planetStarport)) {techMod += 4}
+					else if (this.planetStarport >= 11) {techMod += 6}
+
+					this.planetTechLevel = max(techMin, oneDice() + techMod)
+				}
+			}
+
+			// changes the int planet attribute to their string representation
+			static attributeToString(attribute) {
+				if (attribute <= 9) {
+					return attribute.toString()
+				} else {
+					switch(attribute) {
+						case 10:
+							return "A"
+						case 11:
+							return "B"
+						case 12:
+							return "C"
+						case 13:
+							return "D"
+						case 14:
+							return "E"
+						case 15:
+							return "F"
+						default:
+							return attribute.toString()
+					}
+				}
+			}
+			// changes the int starport to their string representation
+			static starportToString(starport) {
+				if (attribute <= 2) {
+					return "X"
+				} else {
+					switch(starport) {
+						case 3:
+						case 4:
+							return "E"
+						case 5:
+						case 6:
+							return "D"
+						case 7:
+						case 8:
+							return "C"
+						case 9:
+						case 10:
+							return "B"
+						default:
+							return "A"
+					}
+				}
+			}
+
+			// Generates the planet profile
+			worldProfile () {
+				var profileString = ""
+
+				profileString += starportToString(this.planetStarport)
+				profileString += attributeToString(this.planetSize)
+				profileString += attributeToString(this.planetAtmosphere)
+				profileString += attributeToString(this.planetHydrographics)
+				profileString += attributeToString(this.planetPopulation)
+				profileString += attributeToString(this.planetGovernment)
+				profileString += attributeToString(this.planetLaw)
+				profileString += attributeToString(this.planetTechLevel)
+
+				return profileString
+			}
+
+			// Generates a text description of the planet
+			textDescription () {
+
+			}
+
+		}
+
+		// Changes between the tabs in the main pane
+		function changeTab(oldTab, newTab) {
+			$("#tab-" + oldTab).hide()
+			$("#tab-" + newTab).show()
+
+			// handle set up on specific page loads
+			if (newTab == 2) {
+				$("#continue-button-page-2").hide()
+			}
+		}
+
+		// Simulates rolling 6 sided dice.
+		function oneDice() {
+			return 1 + Math.floor(Math.random()*6);
+		}
+
+		function twoDice() {
+			return oneDice() + oneDice();
+		};
+
+		function getModifier(value) {
+			// gets modifier from characteristic
+			if (value <= 0) {return -3}
+			else if (value <= 2) {return -2} 
+			else if (value <= 5) {return -1} 
+			else if (value <= 8) {return 0} 
+			else if (value <= 11) {return 1} 
+			else if (value <= 14) {return 2} 
+			else {return 3} 
+		}
+
+		function onDropSlot(event, ui) {
+			// change slot to only accept the current dice
+			$(this).droppable('option', 'accept', ui.draggable);
+
+			// change position of dice to slot
+			ui.draggable.position({of: $(this), my: 'center', at: 'middle'})
+
+			// get contents of dice and work out mod
+			diceValue = parseInt(ui.draggable[0].textContent)
+			CharacteristicMod = getModifier(parseInt(ui.draggable[0].textContent))
+
+			// label modifier
+			attributeName = $(this).attr('id').split("-")[0]
+			$("#"+attributeName+"-mod").text(CharacteristicMod)
+		}
+
+		function onOutSlot(event, ui) {
+			// remove modifier label
+		}
+
+		// Fill the dice tray with randomly generated attibute values
+		function fillCharacteristicDice() {
+
+			// first enable the dropable slots for dice
+			$("#strength-droppable").droppable({drop: onDropSlot, out: onOutSlot})
+			$("#dexterity-droppable").droppable({drop: onDropSlot, out: onOutSlot})
+			$("#endurance-droppable").droppable({drop: onDropSlot, out: onOutSlot})
+			$("#intellect-droppable").droppable({drop: onDropSlot, out: onOutSlot})
+			$("#education-droppable").droppable({drop: onDropSlot, out: onOutSlot})
+			$("#social-droppable").droppable({drop: onDropSlot, out: onOutSlot})
+
+			// disable roll dice button
+			$("#roll-characteristic-dice-button").hide()
+
+			// for 6 dice, create draggable element with value in text node
+			for (i = 0; i < 6; i++) {
+				
+				var dice = document.createElement("div");
+				dice.id = "draggable-" + i
+				dice.className  = "draggable"
+
+				var characteristicScore = twoDice()
+
+				dice.appendChild(
+					document.createTextNode(characteristicScore)
+				);
+
+				document.getElementById("dice-tray").appendChild(dice)
+
+				$("#draggable-" + i).draggable({ revert: "invalid" })
+
+				// give dice data with their original position to revert to
+				$("#draggable-" + i).data({
+				    'originalLeft': $("#draggable").css('left'),
+				    'origionalTop': $("#draggable").css('top')
+				});
+			}
+
+			$("#continue-button-page-2").show()
+		}
+
+		$( function() {
+			$( "input" ).checkboxradio();
+		} );
+
+		$.getJSON("text_fields.json", function(json) {
+    		console.log(json); // this will show the info it in firebug console
+		});
+	</script>
+
 </head>
 <body>
-
-<div id="accordion">
-  <h3>Introduction</h3>
-  <div>
-    <p>
-      Traveller uses a unique method to create characters ready for play. Instead of choosing a class and various skills or abilities,
-      in Traveller you start off as a bright-eyed 18 year old with the whole universe at your feet. You will then decide what kind of 
-      career you might want to engage in and then watch as your Traveller’s life unfolds – very possibly in a completely different 
-      direction!
-    </p>
-    <p>
-      When you have finished this process, you will be ready for play with a Traveller who has history and a full career (successful or
-      otherwise) behind them. They will now be ready for the next phase of their life, one full of excitement and adventure…
-    </p>
-    <p>
-      It should be noted that there are no ‘super’ characters in Traveller. This game is very much based around the idea of putting 
-      ordinary people in extraordinary situations, and of playing with the cards that the universe has dealt to you. Be ready to make 
-      the best of what you get – much like real life (though real life tends to lack starships, exploding suns and eight foot tall 
-      intelligent lion-like aliens).
-    </p>
-    <p>
-      So, another player may end up with a battle-hardened marine who can shoot out a fox’s eye at a hundred paces with any weapon in 
-      Charted Space, but your failed rock star who never managed to get anywhere in his career may well have more to contribute to the 
-      group. After all, not every problem can be solved with a gun. In fact, in Traveller, a gun may cause more issues than it solves.
-    </p>
-
-    <button onclick="changeActiveAccordion(1)">Continue</button>
-  </div>
-  <h3>Characteristics</h3>
-  <div>
-    <p>
-  	  Every person and creature in Traveller has several characteristics that describe their base mental and physical potential. These 
-  	  are determined by rolling two D6, six different times, to generate six scores. You can then choose which of these values to apply to 
-  	  each statistic. These characteristics may change later during character creation.
-    </p>
-    <p>
-      A value of 7 is considered average, with 2 being the lowest possible value and 12 being the highest. As we roll two dice, extreme 
-      values are less likely. There's a 1 in 36 chance of getting 2 (You must roll two 1s), and a 1 in 6 chance of 
-      getting 7 (You can roll either a 1 and a 6, or a 2 and a 5, etc.)
-    </p>
-    <p>
-    	Depending on the characteristic score, there is an associated dice modifier (DM). A score of 2 gives a DM of -2; a score of 3 to 5 
-    	gives a DM of -1; a score of 6 to 8 gives a DM of 0; a score of 9 to 11 gives a DM of +1; and a score of 12 gives a DM of +2.
-    </p>
-    <p> 
-    	These characteristics also affect your chance of qualifying and being promoted in various jobs in later sections, for instance to 
-    	become a Merchant you roll two D6, and add your INT DM. If you score 4 or above you succed in becoming a Merchant. Hover over the 
-    	characteristics below to see which jobs rely on them and the dice roll needed. 
-    </p>
-    <p>
-    	Roll the dice then drag them into the box you want.
-    </p>
-    <button id="rollDiceButton" onclick="rollDice()"> Roll dice </button>
-
-    <br /> 
-
-    <div id="diceTray"></div>
-
-    <br /> 
-
-    <div id="column-content">
-      <div id="droppable1" class="ui-widget-header">
-      	STR
-      </div>
-      <span id="description" title="None"><b>Strength:</b> A Traveller’s physical strength, fitness and forcefulness.</span>
-    </div><br />
-
-    <div id="column-content">
-      <div id="droppable2" class="ui-widget-header">
-      	DEX
-      </div>
-      <span id="description" title="Entertainer 5+; Rogue 6+"><b>Dexterity:</b> Physical co-ordination and agility, reflexes.</span>
-    </div><br />
-
-    <div id="column-content">
-      <div id="droppable3" class="ui-widget-header">
-      	END
-      </div>
-      <span id="description" title="Army 5+; Marine 6+"><b>Endurance:</b> A Traveller’s stamina, determination and ability to sustain damage.</span>
-    </div><br />
-
-    <div id="column-content">
-      <div id="droppable4" class="ui-widget-header">
-      	INT
-      </div>
-      <span id="description" title="Agent 6+; Entertainer 5+; Merchant 4+; Navy 6+; Scholar 6+; Scout 5+"><b>Intellect:</b> A Traveller’s intelligence and quickness of mind.</span>
-    </div><br />
-
-    <div id="column-content">
-      <div id="droppable5" class="ui-widget-header">
-      	EDU
-      </div>
-      <span id="description" title="Citizen 5+"><b>Education:</b> A measure of a Traveller’s learning and experience. Higher Education lets you start with more skills.</span>
-    </div><br />
-
-    <div id="column-content">
-      <div id="droppable6" class="ui-widget-header">
-      	SOC
-      </div>
-      <span id="description" title="Noble 10+"><b>Social Standing:</b> A Traveller’s place in society.</span>
-    </div><br /><br />
-
-    <button id="confirmCharacteristics" onclick="changeActiveAccordion(2);setCharacteristics()" disabled>Continue</button> <br /><br />
-  </div>
-  <h3>Starting Skills</h3>
-  <div>
-  	<p>
-  		Skills are the most important aspect of a Traveller, and represents how well they can perform various tasks. 
-  	</p>
-  	<p>
-  		If a character is untrained in a skill they suffer a DM-3 when trying to use that skill. If a character has level zero that means 
-  		that they are competent in using that skill, but has had little experience. They do not get any bonuses but avoid the -3 penalty.
-  		If a traveller has one or more levels in a skill (Skill 1, Skill 2, etc.) they are trained. Levels 2-3 indicate a skilled 
-  		profesional, and 4-5 mean the character is probably well respected and known at least planet wide. Each level indicates several 
-  		years of experience using that skill, and grants DM+1 per level for any checks using that skill. 
-  	</p>
-  	<p>
-      Some skills have specialities – specialised, more focussed forms of that skill. A Traveller picks a speciality when he gains level 1 
-      in a skill that has two or more specialities. For example, a Traveller might have Engineer 0, allowing him to make Engineer skill checks 
-      without the unskilled penalty. He might then gain a level in Engineer, at which point he would need to choose a speciality. For Engineer, 
-      this is a choice between jump drive, manoeuvre drive, power plant and electronics.
-  	</p>
-  	<p>
-      Before embarking on your careers, you receive a number of level zero skills equal to your Education DM +3, chosen from the list below. This
-      represents the knowledge you have picked up during adolescence and will allow you to function at a basic level in a technological society.
-  	</p>
-  	<div id="startingSkills"></div>
-  	<br/>
-
-  	<ul class="checkbox-grid">
-  		<li title="Admin: This skill covers bureaucracies and administration of all sorts, including the navigation of bureaucratic obstacles or disasters. It also covers tracking inventories, ship manifests and other records."><input onclick="numberValidSkills()" type="checkbox" id="chkAdmin" value="Admin"/> Admin 0</li>
-  		<li title="Animals: This skill, rare on industrialised or technologically advanced worlds, is for the care of animals."><input onclick="numberValidSkills()" type="checkbox" id="chkAnimals" value="Animals" /> Animals 0</li>
-  		<li title="Art: The Traveller is trained in a type of creative art."><input onclick="numberValidSkills()" type="checkbox" id="chkArt" value="Art" /> Art 0</li>
-  		<li title="Athletics: The Traveller is a trained athlete and is physically fit. The Athletics skill effectively augments a Traveller’s physical characteristics; whatever you can do with Strength alone you can also add your Athletics (strength) DM to, for example. Athletics is also the principal skill used in adverse gravitational environments, specifically Athletics (dexterity) in low or zero-G, and Athletics (strength) in high-G locations."><input onclick="numberValidSkills()" type="checkbox" id="chkAthletics" value="Athletics" /> Athletics 0</li>
-  		<li title="Carouse: Carousing is the art of socialising; having fun, but also ensuring other people have fun, and infectious good humour. It also covers social awareness and subterfuge in such situations."><input onclick="numberValidSkills()" type="checkbox" id="chkCarouse" value="Carouse" /> Carouse 0</li>
-  		<li title="Drive: This skill is for controlling ground vehicles of various types. There are several specialities."><input onclick="numberValidSkills()" type="checkbox" id="chkDrive" value="Drive" /> Drive 0</li>
-  		<li title="Electronics: This skill is used to operate electronic devices such as computers and ship-board systems. Higher levels represent the ability to repair and create electronic devices and systems. There are several specialities."><input onclick="numberValidSkills()" type="checkbox" id="chkElectronics" value="Electronics" /> Electronics 0</li>
-  		<li title="Flyer: The various specialities of this skill cover different types of flying vehicles. Flyers only work in an atmosphere; vehicles that can leave the atmosphere and enter orbit generally use the Pilot skill."><input onclick="numberValidSkills()" type="checkbox" id="chkFlyer" value="Flyer" /> Flyer 0</li>
-  		<li title="Language: There are numerous different Language specialities, each one covering reading and writing a different language. All Travellers can speak and read their native language without needing the Language skill, and automated computer translator programs mean Language skills are not always needed on other worlds. Having Language 0 implies the Traveller has a smattering of simple phrases in several languages."><input onclick="numberValidSkills()" type="checkbox" id="chkLanguage" value="Language" /> Language 0</li>
-  		<li title="Mechanic: The Mechanic skill allows a Traveller to maintain and repair most equipment – some advanced equipment and spacecraft components require the Engineer skill. Unlike the narrower and more focussed Engineer or Science skills, Mechanic does not allow a Traveller to build new devices or alter existing ones – it is purely for repairs and maintenance but covers all types of equipment."><input onclick="numberValidSkills()" type="checkbox" id="chkMechanic" value="Mechanic" /> Mechanic 0</li>
-  		<li title="Medic: The Medic skill covers emergency first aid and battlefield triage as well as diagnosis, treatment, surgery and longterm care."><input onclick="numberValidSkills()" type="checkbox" id="chkMedic" value="Medic" /> Medic 0</li>
-  		<li title="Profession: A Traveller with a Profession skill is trained in producing useful goods or services. There are many different Profession specialities, but each one works the same way – the Traveller can make a Profession check to earn money on a planet that supports that trade. The amount of money raised is Cr250 x the Effect of the check per month. Unlike other skills with specialties, levels in the Profession skill do not grant the ability to use other specialties at level 0. Each specialty must be learned individually. Someone with a Profession skill of 0 has a general grasp of working for a living but little experience beyond the most menial jobs."><input onclick="numberValidSkills()" type="checkbox" id="chkProfession" value="Profession" /> Profession 0</li>
-  		<li title="Science: The Science skill covers not just knowledge but also practical application of that knowledge where such practical application is possible. There are a large range of specialities."><input onclick="numberValidSkills()" type="checkbox" id="chkScience" value="Science" /> Science 0</li>
-  		<li title="Seafarer: The Seafarer skill covers all manner of watercraft and ocean travel."><input onclick="numberValidSkills()" type="checkbox" id="chkSeafarer" value="Seafarer" /> Seafarer 0</li>
-  		<li title="Streetwise: A Traveller with the Streetwise skill understands the urban environment and the power structures in society. On his homeworld and in related systems, he knows criminal contacts and fixers. On other worlds, he can quickly intuit power structures and can fit into local underworlds."><input onclick="numberValidSkills()" type="checkbox" id="chkStreetwise" value="Streetwise" /> Streetwise 0</li>
-  		<li title="Survival: The Survival skill is the wilderness counterpart of the urban Streetwise skill – the Traveller is trained to survive in the wild, build shelters, hunt or trap animals, avoid exposure and so forth. He can recognise plants and animals of his homeworld and related planets, and can pick up on common clues and traits even on unfamiliar worlds."><input onclick="numberValidSkills()" type="checkbox" id="chkSurvival" value="Survival" /> Survival 0</li>
-  		<li title="Vacc Suit: The Vacc Suit skill allows a Traveller to wear and operate spacesuits and environmental suits. A Traveller will rarely need to make Vacc Suit checks under ordinary circumstances – merely possessing the skill is enough. If the Traveller does not have the requisite Vacc Suit skill for the suit he is wearing, he suffers DM-2 to all skill checks made while wearing a suit for each missing level. This skill also permits the character to operate advanced battle armour."><input onclick="numberValidSkills()" type="checkbox" id="chkVaccSuit" value="Vacc Suit" /> Vacc Suit 0</li>
-  	</ul>
-
-    <br>
-    <br />
-
-  	<button id="confirmSkills" onclick="changeActiveAccordion(3); setInitialSkills()">Continue</button>
-
-  </div>
-  <h3>Starting out</h3>
-  <div>
-
-  	<p>
-  		Next, your Traveller engages in one or more career terms, representing their previous experiences and adventures before the start 
-  		of the campaign. Each career term lasts for four years, even if a Traveller fails a Survival roll or is forced to leave a career. 
-  		At many points during a career, a Traveller will have to make a dice roll of some sort. Most of these rolls are based on 
-  		characteristics – simply roll 2D, add the DM from the listed characteristic, and try to get a total higher than or equal to the 
-  		listed value. So, a roll of INT 8+ means ‘roll 2D, add your Intellect DM, and you succeed if you roll an 8 or more’. 
-  	</p>
-  	<p>
-  		In each career, there are three assignments, representing different aspects of the career. Pick one of these assignments when you 
-  		enter the career. For example under the Rogue career there are the assignments Thief, Enforcer or Pirate.
-  	</p>
-  	<p>
-  		You can also choose to enter either University or Military Academy instead during your first, second or third term. If you fail entry
-  		during your first term you can try again in your second or third, however the dice roll gets harder in each subsequent year. If you
-  		fail to qualify you then attempt to join a career as normal. Attending university or Military Academy provides the chance to gain 
-  		increases to your Education characteristic, as well as skills, bonuses to rolls to qualify for other careers, and the chance to roll
-  		for commission before the first term of a military career, entering as an officer.
-  	</p>
-  	<p>
-  		Also, keep track of your age. After you turn 34 there is a small but increasing chance each term that you will lose points in one or
-  		more characteristics.
-  	</p>
-
-  	<h3> Career checklist </h3>
-
-  	<ul>
-  		<li>
-  		  First, if it's in the first three terms, decide whether or not to apply University or Military Academy, and roll to see if you succeed
-  		  in qualifying. If unsuccesful apply for a career as normal, otherwise choose which skills you learn, roll for events, and then roll for
-  		  graduation. After your University/Military Academy proceed to the next term.
-  		</li>
-  		<li> If not entering pre-career education, pick which career you would like to apply for. If this is your first time in this career, roll 
-  			to qualify. If you fail to qualify either choose the drifter career or enter the draft to be randomly assigned a military career (You
-  			may only enter the draft once in your lifetime).
-  		</li>
-  		<li>
-  			Each career has four or five types of skill table associated with it – Personal Development, Service Skills, Specialist Skills, officer
-  			skills and Advanced Education. In each term you spend in a career, pick one of these tables and roll 1D to see which skill you increase.
-  			If this is your first career you gain basic training in all of the service skills at level 0. In the first term of subsequent careers 
-  			you pick only one service skill.
-  		</li>
-  		<li>
-  		    Next roll the survival check to see if you suffer a mishap and are forced to leave your career. Assuming you don't, roll the event check
-  		    to see what interesting thing befalls you.
-  		</li>
-  		<li>
-  			If you are in a military career, you can then roll for commission to become a rank 1 officer, allowing access to the officer tables. If
-  			your social standing is below 9 you may only roll for commission in your first term.
-  		</li>
-  		<li>
-  			Every career has a mandatory roll for advancement, which is different to the commission. If you make a successful advancement roll you gain
-  			a rank in the career and get an extra roll on any of the skills and training tables as well as any bonuses listed. However, if your 
-  			advancement roll is equal to or less than the number of terms you have spent in this career, then you cannot continue in this career after 
-  			this term. Either your services are no longer required, or events have caused you to leave, or perhaps you are simply bored and want a new 
-  			challenge. If you roll a natural 12, then you must continue in this career. You are too valuable to lose and will be strong-armed into 
-  			staying.
-  		</li>
-  		<li>
-  			Finally, decide whether to continue to the next term or finish character creation. When you leave a career for any reason, you gain material
-  			benefits from that career, representing money, equipment and influence acquired during your years of work. There are two tables for this in
-  			each career – Cash and Benefits. You may only roll on Cash tables a maximum of three times in your lifetime, regardless of how many careers 
-  			or Benefit rolls you accumulate. You receive one Benefit roll per full term served. Leaving due to a mishap means you lose the Benefit roll 
-  			for that term, but you still gain the benefit rolls for previous terms in that career. If you reached rank 1 or 2, you get an extra Benefit 
-  			roll when leaving that career. If you reached rank 3 or 4, you get two extra Benefit rolls, and if you reached rank 5 or 6, you get three 
-  			extra Benefit rolls and may also apply DM+1 to all rolls on the Cash and Benefits tables. 
-  		</li>
+	<div class="wrapper">
+		<div class="container">
+			<div class="character-pane">
+				<div class="attributes-wrapper">
+					<h1>Attributes</h1>
+					<div class="column-content">
+						<div id="strength-mod" class="dicemod"></div>
+						<div id="strength-droppable" class="droppable"></div> 
+						<p><b> &nbsp; STRENGTH</b></p>
+					</div>
+					<div class="column-content">
+						<div id="dexterity-mod" class="dicemod"></div>
+						<div id="dexterity-droppable" class="droppable"></div> 
+						<p><b> &nbsp; DEXTERITY</b></p>
+					</div>
+					<div class="column-content">
+						<div id="endurance-mod" class="dicemod"></div>
+						<div id="endurance-droppable" class="droppable"></div> 
+						<p><b> &nbsp; ENDURANCE</b></p>
+					</div>
+					<div class="column-content">
+						<div id="intellect-mod" class="dicemod"></div>
+						<div id="intellect-droppable" class="droppable"></div> 
+						<p><b> &nbsp; INTELLECT</b></p>
+					</div>
+					<div class="column-content">
+						<div id="education-mod" class="dicemod"></div>
+						<div id="education-droppable" class="droppable"></div> 
+						<p><b> &nbsp; EDUCATION</b></p>
+					</div>
+					<div class="column-content">
+						<div id="social-mod" class="dicemod"></div>
+						<div id="social-droppable" class="droppable"></div> 
+						<p><b> &nbsp; SOCIAL STANDING</b></p>
+					</div>
+				</div>
+				<div class="skills-wrapper">
+					<h1>Skills</h1>
+				</div>
+			</div>
 
 
-  	</ul>
+			<div class="main-pane">
+				<div id="tab-1" class="main-pane-tab">
 
-  	<button onclick="changeActiveAccordion(4); updatePreCareerEdu()">Continue</button>
-  </div>
+					<h1> Introduction </h1>
+					<p>
+						Traveller uses a unique method to create characters ready for play. Instead of choosing a class and various skills or abilities,
+						in Traveller you start off as a bright-eyed 18 year old with the whole universe at your feet. You will then decide what kind of 
+						career you might want to engage in and then watch as your Traveller’s life unfolds – very possibly in a completely different 
+						direction!
+					</p>
+					<p>
+						When you have finished this process, you will be ready for play with a Traveller who has history and a full career (successful or
+						otherwise) behind them. They will now be ready for the next phase of their life, one full of excitement and adventure…
+					</p>
+					<p>
+						It should be noted that there are no ‘super’ characters in Traveller. This game is very much based around the idea of putting 
+						ordinary people in extraordinary situations, and of playing with the cards that the universe has dealt to you. Be ready to make 
+						the best of what you get – much like real life (though real life tends to lack starships, exploding suns and eight foot tall 
+						intelligent lion-like aliens).
+					</p>
+					<p>
+						So, another player may end up with a battle-hardened marine who can shoot out a fox’s eye at a hundred paces with any weapon in 
+						Charted Space, but your failed rock star who never managed to get anywhere in his career may well have more to contribute to the 
+						group. After all, not every problem can be solved with a gun. In fact, in Traveller, a gun may cause more issues than it solves.
+					</p>
 
-  <h3>Select pre-career education</h3>
-  <div>
-  	<p>
-  	  As it's one of the first three terms for your character, you can choose to enroll in pre-career education. Select an option below or skip for now.
-  	  Shown in grey are the dice modifiers (DM) affecting the roll. 
-    </p>
-    <p>
-  	  Hover over the <span style="color: #f59f02">orange text </span> for more information.
-  	</p>
-  	<br><br><br>
+					<br><br>
 
-	<table id="pre-career-table">
-        <tr>
-	      <th>Pre-career Education</th>
-	      <th>Entry Roll</th>
-	      <th>Entry Benefits</th>
-	      <th>Graduation Roll</th>
-	      <th>Graduation Benefits</th>
-	    </tr>
-	    <tr onclick="setupPreEducationRoll('university')">
-	      <td>University</td>
-	      <td>EDU 7+  <span style="color: #f59f02" id="university-entry-dm"></span> </td>
-	      <td>+1 to EDU, one lvl 0 and one lvl 1 skill from <span style="color: #f59f02" title="Admin, Advocate, Animals, Art, Astrogation, Electronics, Engineer, Language, Medic, Navigation, Profession, Science">this list.</span></td>
-	      <td>INT 7+ (11+ w/ honors)</td>
-	      <td>+2 to EDU, chosen skills increase to lvl 1 and lvl 2, DM+1 (DM+2 w/ honors) when applying for <span style="color: #f59f02" title="Agent, Army, Citizen (corporate), Entertainer (journalist), Marines, Navy, Scholar, Scouts.">these jobs.</span> Can roll for commision before 1st term of military career (DM+2 if w/ honors).</td>
-	    </tr>
-	    <tr onclick="setupPreEducationRoll('army')">
-	      <td>Military Academy - Army</td>
-	      <td>END 8+ <span style="color: #f59f02" id="army-acad-entry-dm"></span> </td>
-	      <td>Gain all of <span style="color: #f59f02" title="Drive/Vacc suit 0, Athletics 0, Gun Combat 0, Recon 0, Melee 0, Heavy Weapons 0.">these skills.</span></td>
-	      <td>INT 8+ (11+ w/ honors)</td>
-	      <td>+1 to EDU, (+1 to SOC w/ honors), automatic entry into the Army, increase 3 entry skills to lvl 1 if joining the Army, can roll for commision before 1st term of military career (automatic success w/ honors).</td>
-	    </tr>
-	    <tr onclick="setupPreEducationRoll('marines')">
-	      <td>Military Academy - Marines</td>
-	      <td>END 9+ <span style="color: #f59f02" id="marine-acad-entry-dm"></span> </td>
-	      <td>Gain all of <span style="color: #f59f02" title="Vacc Suit 0, Athletics 0, Gun Combat 0, Tactics 0, Heavy Weapons 0, Stealth 0.">these skills.</span></td>
-	      <td>INT 8+ (11+ w/ honors)</td>
-	      <td>+1 to EDU, (+1 to SOC w/ honors), automatic entry into the Marines, increase 3 entry skills to lvl 1 if joining the Marines, can roll for commision before 1st term of military career (automatic success w/ honors).</td>
-	    </tr>
-	    <tr onclick="setupPreEducationRoll('navy')">
-	      <td>Military Academy - Navy</td>
-	      <td>INT 9+ <span style="color: #f59f02" id="navy-acad-entry-dm"></span> </td>
-	      <td>Gain all of <span style="color: #f59f02" title="Pilot 0, Vacc Suit 0, Athletics 0, Gunner 0, Mechanic 0, Gun Combat 0.">these skills.</span></td>
-	      <td>INT 8+ (11+ w/ honors)</td>
-	      <td>+1 to EDU, (+1 to SOC w/ honors), automatic entry into the Navy, increase 3 entry skills to lvl 1 if joining the Navy, can roll for commision before 1st term of military career (automatic success w/ honors).</td>
-	    </tr>
-	    <tr onclick="changeActiveAccordion(6)">
-	      <td colspan="5">Skip pre-career education for now </td>
-	    </tr>
+					<button onclick="changeTab(1,2)" class="ui-button ui-widget"> Continue </button>
 
-	</table>
+				</div>
+				<div id="tab-2" class="main-pane-tab" hidden=true>
 
-	<div id="pre-edu-roll-for-entry" hidden=true>
-		<p>
-			<span id="pre-edu-text"></span><br>
-			<button id="btn-roll-entry-pre-edu" onclick="PreEducationRoll()">Roll dice</button><br>
-			<span id="pre-edu-entry-result"></span>
-			<button id="btn-enter-pre-edu" hidden=true onclick="changeActiveAccordion(7); resetPreEducationPage()">Enter pre-education</button><br>
-			<button id="btn-continue-career" hidden=true onclick="changeActiveAccordion(6); resetPreEducationPage()">Continue to careers</button><br>
+					<h1> Characteristics </h1>
+					<p>
+						Every person and creature in Traveller has several characteristics that describe their base mental and physical potential. These 
+						are determined by rolling two D6, six different times, to generate six scores. You can then choose which of these values to apply to 
+						each statistic. These characteristics will likely change later during character creation.
+					</p>
+					<p>
+						A value of 7 is considered average, with 2 being the lowest possible value and 12 being the highest. As we roll two dice, extreme 
+						values are less likely. There's a 1 in 36 chance of getting 2 (You must roll two 1s), and a 1 in 6 chance of getting 7 (You can roll 
+						either a 1 and a 6, or a 2 and a 5, etc.)
+					</p>
+					<p>
+						Depending on the characteristic score, there is an associated dice modifier (DM). When you roll for a specific skill you add your dice 
+						modifier.
+					</p>
+					<table style="width:50%;">
+						<tr>
+							<th>Attribute value</th><th>Dice modifier</th>
+						</tr>
+						<tr>
+							<td> 0       </td><td> -3 </td>
+						</tr>
+						<tr>
+							<td> 1 - 2   </td><td> -2 </td>
+						</tr>
+						<tr>
+							<td> 3 - 5   </td><td> -1 </td>
+						</tr>
+						<tr>
+							<td> 6 - 8   </td><td>  0 </td>
+						</tr>
+						<tr>
+							<td> 9 - 11  </td><td> +1 </td>
+						</tr>
+						<tr>
+							<td> 12 - 14 </td><td> +2 </td>
+						</tr>
+						<tr>
+							<td> 15+     </td><td> +3 </td>
+						</tr>
 
-		</p>
+					</table>
+					<p>
+						These characteristics also affect your chance of qualifying and being promoted in various jobs in later sections, for instance to 
+						become a Merchant you roll two D6, and add your INT DM. If you score 4 or above you succeed in becoming a Merchant.
+					</p>
+					<p>
+						Roll your characteristic values then drag them over to the slots on the left.
+					</p>
+
+					<br><br>
+
+					<button id="roll-characteristic-dice-button" onclick="fillCharacteristicDice()" class="ui-button ui-widget"> Roll Dice </button>
+
+					<div id="dice-tray" class="column-content"></div>
+
+					<button id="continue-button-page-2" onclick="changeTab(2,3)" class="ui-button ui-widget"> Continue </button>
+
+				</div>
+				<div id="tab-3" class="main-pane-tab" hidden=true>
+					<h1> Homeworld </h1>
+
+					<p>
+						Thinking about where your character went through their adolescence can help shape them. Generate a random homeworld for inspiration,
+						it will not affect any later part of the character creation. Life on the surface may be inhospitable, but there could always be reasons 
+						for orbital habitats.
+					</p>
+
+					<button class="ui-button ui-widget"> Random Homeworld </button>
+
+					<div id="random-homeworld-field">
+					</div>
+
+					<button id="continue-button-page-3" onclick="changeTab(3,4)" class="ui-button ui-widget"> Continue </button>
+				</div>
+				<div id="tab-4" class="main-pane-tab" hidden=true>
+					<h1> Starting Skills </h1>
+					<p>
+						Skills are the most important aspect of a Traveller, and represents how well they can perform various tasks. 
+					</p>
+					<p>
+						If a character is untrained in a skill they suffer a DM-3 when trying to use that skill. If a character has level zero that means 
+						that they are competent in using that skill, but has had little experience. They do not get any bonuses but avoid a -3 penalty.
+						If a traveller has one or more levels in a skill (Skill 1, Skill 2, etc.) they are trained. Levels 2-3 indicate a skilled 
+						professional, and 4-5 mean the character is probably well respected and known at least planet wide. Each level indicates several 
+						years of experience using that skill, and grants DM+1 per level for any checks using that skill.
+					</p>
+					<p>
+						Some skills have specialities – specialised, more focussed forms of that skill. A Traveller picks a speciality when he gains level 1 
+						in a skill that has two or more specialities. For example, a Traveller might have Engineer 0, allowing him to make Engineer skill checks 
+						without the unskilled penalty. He might then gain a level in Engineer, at which point he would need to choose a speciality. For Engineer, 
+						this is a choice between jump drive, manoeuvre drive, power plant and electronics.
+					</p>
+					<p>
+						Before embarking on your careers, you receive a number of level zero skills equal to your Education DM +3, chosen from the list below. This
+						represents the knowledge you have picked up during adolescence and will allow you to function at a basic level in a technological society.
+					</p>
+
+					<fieldset id="">
+						<legend>Select Skills: </legend>
+						<label for="checkbox-1">Admin 0</label>
+						<input type="checkbox" name="checkbox-1" id="checkbox-1">
+						<label for="checkbox-2">Animals 0</label>
+						<input type="checkbox" name="checkbox-2" id="checkbox-2">
+						<label for="checkbox-3">Art 0</label>
+						<input type="checkbox" name="checkbox-3" id="checkbox-3">
+						<label for="checkbox-4">Athletics 0</label>
+						<input type="checkbox" name="checkbox-4" id="checkbox-4">
+						<label for="checkbox-5">Carouse 0</label>
+						<input type="checkbox" name="checkbox-5" id="checkbox-5">
+						<label for="checkbox-6">Drive 0</label>
+						<input type="checkbox" name="checkbox-6" id="checkbox-6">
+						<label for="checkbox-7">Electronics 0</label>
+						<input type="checkbox" name="checkbox-7" id="checkbox-7">
+						<label for="checkbox-8">Flyer 0</label>
+						<input type="checkbox" name="checkbox-8" id="checkbox-8">
+						<label for="checkbox-9">Language 0</label>
+						<input type="checkbox" name="checkbox-9" id="checkbox-9">
+					</fieldset>
+				</div>
+			</div>
+		</div>
 	</div>
 
-  </div>
 
-  <h3>Pre-career education</h3>
-  <div>
-
-  	<button onclick="changeActiveAccordion(7)">Finish</button>
-  </div>
-
-  <h3>section 7</h3>
-  <div>
-
-  	<button onclick="changeActiveAccordion(false)">Finish</button>
-  </div>
-</div>
-
-<br/>
-
-<div id="character-sheet">
-  <b>NAME:</b> <span id="character-name"></span><br/>
-  <b>AGE:</b> <span id="character-age">0</span><br/>
-  <h2>CHARACTERISTICS:</h2><br/>
-  <b>STR:</b><span id="character-str">0</span>&nbsp;&nbsp;
-  <b>DEX:</b><span id="character-dex">0</span>&nbsp;&nbsp;
-  <b>END:</b><span id="character-end">0</span>&nbsp;&nbsp;
-  <b>INT:</b><span id="character-int">0</span>&nbsp;&nbsp;
-  <b>EDU:</b><span id="character-edu">0</span>&nbsp;&nbsp;
-  <b>SOC:</b><span id="character-soc">0</span><br/>
-  <h2> Skills: </h2><br/>
-  <span id="character-skills"></span><br/>
-  <h2> Career: </h2><br/>
-  <span id="character-Career"></span><br/>
-</div>
-
+	<script type="text/javascript" src="main.js"></script>
 </body>
-</html> 
-
+</html>
