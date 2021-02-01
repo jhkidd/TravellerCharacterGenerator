@@ -185,7 +185,7 @@
 						if (this.planetTemperature >= 12) {hydroMod -= 6}
 					}
 
-					this.planetHydrographics = min(max(twoDice() + hydroMod - 7, 0), 10)
+					this.planetHydrographics = Math.min(Math.max(twoDice() + hydroMod - 7, 0), 10)
 				}
 				
 				this.planetPopulation = twoDice() - 2
@@ -196,9 +196,9 @@
 					this.planetCulture = 0
 					this.planetLaw = 0
 				} else {
-					this.planetGovernment = min(max(twoDice() + this.planetPopulation - 7, 0), 15)
+					this.planetGovernment = Math.min(Math.max(twoDice() + this.planetPopulation - 7, 0), 15)
 					this.planetCulture = oneDice() + oneDice()*10
-					this.planetLaw = min(max(twoDice() + this.planetGovernment - 7, 0), 9)	
+					this.planetLaw = Math.min(Math.max(twoDice() + this.planetGovernment - 7, 0), 9)	
 				}
 
 				// Startport level
@@ -241,12 +241,12 @@
 					else if ([9,10].includes(this.planetStarport)) {techMod += 4}
 					else if (this.planetStarport >= 11) {techMod += 6}
 
-					this.planetTechLevel = max(techMin, oneDice() + techMod)
+					this.planetTechLevel = Math.max(techMin, oneDice() + techMod)
 				}
 			}
 
 			// changes the int planet attribute to their string representation
-			static attributeToString(attribute) {
+			attributeToString(attribute) {
 				if (attribute <= 9) {
 					return attribute.toString()
 				} else {
@@ -268,9 +268,10 @@
 					}
 				}
 			}
+
 			// changes the int starport to their string representation
-			static starportToString(starport) {
-				if (attribute <= 2) {
+			starportToString(starport) {
+				if (starport <= 2) {
 					return "X"
 				} else {
 					switch(starport) {
@@ -287,7 +288,7 @@
 						case 10:
 							return "B"
 						default:
-							return "A"
+							return "A"	
 					}
 				}
 			}
@@ -296,21 +297,34 @@
 			worldProfile () {
 				var profileString = ""
 
-				profileString += starportToString(this.planetStarport)
-				profileString += attributeToString(this.planetSize)
-				profileString += attributeToString(this.planetAtmosphere)
-				profileString += attributeToString(this.planetHydrographics)
-				profileString += attributeToString(this.planetPopulation)
-				profileString += attributeToString(this.planetGovernment)
-				profileString += attributeToString(this.planetLaw)
-				profileString += attributeToString(this.planetTechLevel)
+				profileString += this.starportToString(this.planetStarport)
+				profileString += this.attributeToString(this.planetSize)
+				profileString += this.attributeToString(this.planetAtmosphere)
+				profileString += this.attributeToString(this.planetHydrographics)
+				profileString += this.attributeToString(this.planetPopulation)
+				profileString += this.attributeToString(this.planetGovernment)
+				profileString += this.attributeToString(this.planetLaw)
+				profileString += this.attributeToString(this.planetTechLevel)
 
 				return profileString
 			}
 
 			// Generates a text description of the planet
 			textDescription () {
+				var textDescription = ""
 
+				textDescription += "Profile: " + this.worldProfile() + " <br> "
+				textDescription += "<p>" + textReferenceData['planet']['size'][this.planetSize] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['atmosphere'][this.planetAtmosphere] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['hydrographics'][this.planetHydrographics] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['temperature'][this.planetTemperature] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['population'][this.planetPopulation] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['government'][this.planetGovernment] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['culture'][this.planetCulture.toString()] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['law'][this.planetLaw] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['tech'][this.planetTechLevel] + "</p>"
+
+				return textDescription
 			}
 
 		}
@@ -407,12 +421,22 @@
 			$("#continue-button-page-2").show()
 		}
 
+		function generateHomeworld() {
+			x = new homeworld()
+
+			$("#random-homeworld-field").html(x.textDescription())
+		}
+
+
+
 		$( function() {
 			$( "input" ).checkboxradio();
 		} );
 
-		$.getJSON("text_fields.json", function(json) {
-    		console.log(json); // this will show the info it in firebug console
+
+		var textReferenceData = ""
+		$.getJSON("https://raw.githubusercontent.com/jhkidd/TravellerCharacterGenerator/master/text_fields.json", function(json) {
+    		textReferenceData = json; // this will show the info it in firebug console
 		});
 	</script>
 
@@ -561,10 +585,9 @@
 						for orbital habitats.
 					</p>
 
-					<button class="ui-button ui-widget"> Random Homeworld </button>
+					<button id="gen-homeworld-button" class="ui-button ui-widget" onclick="generateHomeworld()"> Random Homeworld </button>
 
-					<div id="random-homeworld-field">
-					</div>
+					<div id="random-homeworld-field"></div>
 
 					<button id="continue-button-page-3" onclick="changeTab(3,4)" class="ui-button ui-widget"> Continue </button>
 				</div>
