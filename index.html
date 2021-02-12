@@ -130,6 +130,7 @@
 			max-width: 100%;
 			min-height: 400px;
 			border-style: solid var(--medium-grey);
+			text-align: left;
 		}
 
 		table {
@@ -314,15 +315,15 @@
 				var textDescription = ""
 
 				textDescription += "Profile: " + this.worldProfile() + " <br> "
-				textDescription += "<p>" + textReferenceData['planet']['size'][this.planetSize] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['atmosphere'][this.planetAtmosphere] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['hydrographics'][this.planetHydrographics] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['temperature'][this.planetTemperature] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['population'][this.planetPopulation] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['government'][this.planetGovernment] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['culture'][this.planetCulture.toString()] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['law'][this.planetLaw] + "</p>"
-				textDescription += "<p>" + textReferenceData['planet']['tech'][this.planetTechLevel] + "</p>"
+				textDescription += textReferenceData['planet']['size'][this.planetSize] + " "
+				textDescription += textReferenceData['planet']['atmosphere'][this.planetAtmosphere] + " "
+				textDescription += textReferenceData['planet']['hydrographics'][this.planetHydrographics] + " "
+				textDescription += textReferenceData['planet']['temperature'][this.planetTemperature] + "</p>"
+				textDescription += "<p>" + textReferenceData['planet']['population'][this.planetPopulation] + " "
+				textDescription += textReferenceData['planet']['government'][this.planetGovernment] + " "
+				textDescription += textReferenceData['planet']['culture'][this.planetCulture.toString()] + " "
+				textDescription += textReferenceData['planet']['law'][this.planetLaw] + " "
+				textDescription += textReferenceData['planet']['tech'][this.planetTechLevel] + "</p>"
 
 				return textDescription
 			}
@@ -434,9 +435,10 @@
 		} );
 
 
-		var textReferenceData = ""
+		var textReferenceData = {}
+
 		$.getJSON("https://raw.githubusercontent.com/jhkidd/TravellerCharacterGenerator/master/text_fields.json", function(json) {
-    		textReferenceData = json; // this will show the info it in firebug console
+    		textReferenceData = json;
 		});
 	</script>
 
