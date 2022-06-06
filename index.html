@@ -169,6 +169,8 @@
 				this.homeworld = null
 
 				this.skills = {}
+
+				this.age = 18
 			}
 
 			get strengthMod() {
@@ -190,20 +192,27 @@
 				return getModifier(this.socialStanding)
 			}
 
+			// Updates the skills. If a level is specified it set's it at that value
 			addSkill(skillName, level=null) {
-				alreadyTrained = this.skills.hasOwnProperty(skillName)
+				var alreadyTrained = this.skills.hasOwnProperty(skillName)
 				if (alreadyTrained && level == null) {
 					this.skills[skillName] += 1
+					$('#'+skillName+'-level').text(this.skills[skillName])
+				} else if ((!alreadyTrained) && level == null) {
+					this.skills[skillName] = 0
+					$('#'+skillName+'-level').text(this.skills[skillName])
+					document.getElementById(skillName+"-container").style.color = 'var(--light-grey)'
 				} else if (alreadyTrained && level != null) {
-					// TODO
-				} else if (true) {
 					// TODO
 				} else {
 					// TODO
 				}
 			}
 
-
+			increaseAge() {
+				this.age += 4
+				updateAge(this.age)
+			}
 		}
 
 		// follows the rules for generating a random planet
@@ -381,7 +390,6 @@
 
 				return textDescription
 			}
-
 		}
 
 		// Changes between the tabs in the main pane
@@ -409,8 +417,10 @@
 				// Set the starting skills
 				selectedSkills = readCheckboxes("starting-skills")
 				for (i = 0; i < selectedSkills.length; i++) {
-					playerCharacter.skills[selectedSkills[i]] = 0
+					playerCharacter.addSkill(selectedSkills[i])
 				}
+
+				updateAge(playerCharacter.age)
 			}
 		}
 
@@ -457,6 +467,17 @@
 			$("#"+attributeName+"-mod").text(CharacteristicMod)
 
 			playerCharacter[attributeName] = diceValue
+
+			if (![
+				  ($("#strength-mod").text()==''),
+				  ($("#dexterity-mod").text()==''),
+				  ($("#endurance-mod").text()==''),
+				  ($("#intellect-mod").text()==''),
+				  ($("#education-mod").text()==''),
+				  ($("#socialStanding-mod").text()==''),
+				].some(item => item)) {
+				$('#continue-button-page-2').attr("disabled", false).removeClass("ui-state-disabled")
+			}
 		}
 
 		function onOutSlot(event, ui) {
@@ -519,12 +540,24 @@
 			playerCharacter.homeworld = x
 		}
 
+		// Change the age on the sheet to something specific
+		function updateAge(newAge) {
+			$("#age-container").text(newAge)
+		}
 
+		// check when starting skills are all selected
+		function checkInitialSkills() {
+			selectedSkills = readCheckboxes("starting-skills")
+			if (3+playerCharacter.educationMod == selectedSkills.length) {
+				$('#continue-button-page-4').attr("disabled", false).removeClass("ui-state-disabled")
+			} else {
+				$('#continue-button-page-4').attr("disabled", true).addClass("ui-state-disabled")
+			}
+		}
 
 		$( function() {
 			$( "input" ).checkboxradio();
 		} );
-
 
 		var textReferenceData = {}
 
@@ -541,7 +574,7 @@
 	<div class="wrapper">
 		<div class="container">
 			<div class="character-pane">
-				<h1>AGE: <span id="age-container" style="color:var(--light-grey)">18</span></h1>
+				<h1>AGE: <span id="age-container" style="color:var(--light-grey)">-</span></h1>
 				<div class="attributes-wrapper">
 					<h1>Attributes</h1>
 					<div class="column-content">
@@ -578,164 +611,163 @@
 				<div class="skills-wrapper">
 					<h1>Skills</h1>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ADMIN</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="admin-container" style="color:var(--medium-grey)">ADMIN</span>
+						<span id="admin-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ADVOCATE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="advocate-container" style="color:var(--medium-grey)">ADVOCATE</span>
+						<span id="advocate-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ANIMALS</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="animals-container" style="color:var(--medium-grey)">ANIMALS</span>
+						<span id="animals-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ART</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="art-container" style="color:var(--medium-grey)">ART</span>
+						<span id="art-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ASTROGATION</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="astrogation-container" style="color:var(--medium-grey)">ASTROGATION</span>
+						<span id="astrogation-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ATHLETICS</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="athletics-container" style="color:var(--medium-grey)">ATHLETICS</span>
+						<span id="athletics-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">BROKER</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="broker-container" style="color:var(--medium-grey)">BROKER</span>
+						<span id="broker-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">CAROUSE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="carouse-container" style="color:var(--medium-grey)">CAROUSE</span>
+						<span id="carouse-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">DECEPTION</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="deception-container" style="color:var(--medium-grey)">DECEPTION</span>
+						<span id="deception-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">DIPLOMAT</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b> <span id="diplomat-container" style="color:var(--medium-grey)">DIPLOMAT</span></b></p>
+						<div id="diplomat-level" class="skilllevel"></div>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">DRIVE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="drive-container" style="color:var(--medium-grey)">DRIVE</span>
+						<span id="drive-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ELECTRONICS</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="electronics-container" style="color:var(--medium-grey)">ELECTRONICS</span>
+						<span id="electronics-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">ENGINEER</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="engineer-container" style="color:var(--medium-grey)">ENGINEER</span>
+						<span id="engineer-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">EXPLOSIVES</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="explosives-container" style="color:var(--medium-grey)">EXPLOSIVES</span>
+						<span id="explosives-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">FLYER</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="flyer-container" style="color:var(--medium-grey)">FLYER</span>
+						<span id="flyer-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">GAMBLER</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="gambler-container" style="color:var(--medium-grey)">GAMBLER</span>
+						<span id="gambler-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">GUNNER</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="gunner-container" style="color:var(--medium-grey)">GUNNER</span>
+						<span id="gunner-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">GUN COMBAT</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="gun-combat-container" style="color:var(--medium-grey)">GUN COMBAT</span>
+						<span id="gun-combat-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">HEAVY WEAPONS</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="heavy-weapons-container" style="color:var(--medium-grey)">HEAVY WEAPONS</span>
+						<span id="heavy-weapons-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">INVESTIGATE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="investigate-container" style="color:var(--medium-grey)">INVESTIGATE</span>
+						<span id="investigate-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">JACK-OF-ALL-TRADES</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="jack-of-all-trades-container" style="color:var(--medium-grey)">JACK-OF-ALL-TRADES</span>
+						<span id="jack-of-all-trades-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">LANGUAGE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="language-container" style="color:var(--medium-grey)">LANGUAGE</span>
+						<span id="language-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">LEADERSHIP</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="leadership-container" style="color:var(--medium-grey)">LEADERSHIP</span>
+						<span id="leadership-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">MECHANIC</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="mechanic-container" style="color:var(--medium-grey)">MECHANIC</span>
+						<span id="mechanic-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">MEDIC</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="medic-container" style="color:var(--medium-grey)">MEDIC</span>
+						<span id="medic-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">MELEE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="melee-container" style="color:var(--medium-grey)">MELEE</span>
+						<span id="melee-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">NAVIGATION</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="navigation-container" style="color:var(--medium-grey)">NAVIGATION</span>
+						<span id="navigation-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">PERSUADE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="persuade-container" style="color:var(--medium-grey)">PERSUADE</span>
+						<span id="persuade-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">PILOT</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="pilot-container" style="color:var(--medium-grey)">PILOT</span>
+						<span id="pilot-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">PROFESSION</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="profession-container" style="color:var(--medium-grey)">PROFESSION</span>
+						<span id="profession-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">RECON</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="recon-container" style="color:var(--medium-grey)">RECON</span>
+						<span id="recon-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">SCIENCE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="science-container" style="color:var(--medium-grey)">SCIENCE</span>
+						<span id="science-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">SEAFARER</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="seafarer-container" style="color:var(--medium-grey)">SEAFARER</span>
+						<span id="seafarer-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">STEALTH</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="stealth-container" style="color:var(--medium-grey)">STEALTH</span>
+						<span id="stealth-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">STEWARD</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="steward-container" style="color:var(--medium-grey)">STEWARD</span>
+						<span id="steward-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">STREETWISE</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="streetwise-container" style="color:var(--medium-grey)">STREETWISE</span>
+						<span id="streetwise-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">SURVIVAL</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="survival-container" style="color:var(--medium-grey)">SURVIVAL</span>
+						<span id="survival-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">TACTICS</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="tactics-container" style="color:var(--medium-grey)">TACTICS</span>
+						<span id="tactics-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 					<div>
-						<p><b> <span id="age-container" style="color:var(--medium-grey)">VACC SUIT</span></b></p>
-						<div id="admin-level" class="skilllevel"></div>
+						<p><b><span id="vacc-suit-container" style="color:var(--medium-grey)">VACC SUIT</span>
+						<span id="vacc-suit-level" style="color:var(--light-grey)"></span></b></p>
 					</div>
 				</div>
 			</div>
-
 
 			<div class="main-pane">
 				<div id="tab-1" class="main-pane-tab">
@@ -826,7 +858,7 @@
 
 					<div id="dice-tray" class="column-content"></div>
 
-					<button id="continue-button-page-2" onclick="changeTab(2,3)" class="ui-button ui-widget"> Continue </button>
+					<button id="continue-button-page-2" onclick="changeTab(2,3)" class="ui-button ui-widget ui-state-disabled" disabled> Continue </button>
 
 				</div>
 				<div id="tab-3" class="main-pane-tab" hidden=true>
@@ -870,43 +902,42 @@
 					<fieldset id="starting-skills">
 						<legend id="starting-skills">Select Skills: </legend>
 						<label for="checkbox-1">Admin 0</label>
-						<input type="checkbox" name="admin" id="checkbox-1">
+						<input type="checkbox" name="admin" id="checkbox-1" onclick="checkInitialSkills();">
 						<label for="checkbox-2">Animals 0</label>
-						<input type="checkbox" name="animals" id="checkbox-2">
+						<input type="checkbox" name="animals" id="checkbox-2" onclick="checkInitialSkills();">
 						<label for="checkbox-3">Art 0</label>
-						<input type="checkbox" name="art" id="checkbox-3">
+						<input type="checkbox" name="art" id="checkbox-3" onclick="checkInitialSkills();">
 						<label for="checkbox-4">Athletics 0</label>
-						<input type="checkbox" name="athletics" id="checkbox-4">
+						<input type="checkbox" name="athletics" id="checkbox-4" onclick="checkInitialSkills();">
 						<label for="checkbox-5">Carouse 0</label>
-						<input type="checkbox" name="carouse" id="checkbox-5">
+						<input type="checkbox" name="carouse" id="checkbox-5" onclick="checkInitialSkills();">
 						<label for="checkbox-6">Drive 0</label>
-						<input type="checkbox" name="drive" id="checkbox-6">
+						<input type="checkbox" name="drive" id="checkbox-6" onclick="checkInitialSkills();">
 						<label for="checkbox-7">Electronics 0</label>
-						<input type="checkbox" name="electronics" id="checkbox-7">
+						<input type="checkbox" name="electronics" id="checkbox-7" onclick="checkInitialSkills();">
 						<label for="checkbox-8">Flyer 0</label>
-						<input type="checkbox" name="flyer" id="checkbox-8">
+						<input type="checkbox" name="flyer" id="checkbox-8" onclick="checkInitialSkills();">
 						<label for="checkbox-9">Language 0</label>
-						<input type="checkbox" name="language" id="checkbox-9">
+						<input type="checkbox" name="language" id="checkbox-9" onclick="checkInitialSkills();">
 						<label for="checkbox-10">Mechanic 0</label>
-						<input type="checkbox" name="mechanic" id="checkbox-10">
+						<input type="checkbox" name="mechanic" id="checkbox-10" onclick="checkInitialSkills();">
 						<label for="checkbox-11">Medic 0</label>
-						<input type="checkbox" name="medic" id="checkbox-11">
+						<input type="checkbox" name="medic" id="checkbox-11" onclick="checkInitialSkills();">
 						<label for="checkbox-12">Profession 0</label>
-						<input type="checkbox" name="profession" id="checkbox-12">
+						<input type="checkbox" name="profession" id="checkbox-12" onclick="checkInitialSkills();">
 						<label for="checkbox-13">Science 0</label>
-						<input type="checkbox" name="science" id="checkbox-13">
+						<input type="checkbox" name="science" id="checkbox-13" onclick="checkInitialSkills();">
 						<label for="checkbox-14">Seafarer 0</label>
-						<input type="checkbox" name="seafarer" id="checkbox-14">
+						<input type="checkbox" name="seafarer" id="checkbox-14" onclick="checkInitialSkills();">
 						<label for="checkbox-15">Streetwise 0</label>
-						<input type="checkbox" name="streetwise" id="checkbox-15">
+						<input type="checkbox" name="streetwise" id="checkbox-15" onclick="checkInitialSkills();">
 						<label for="checkbox-16">Survival 0</label>
-						<input type="checkbox" name="survival" id="checkbox-16">
+						<input type="checkbox" name="survival" id="checkbox-16" onclick="checkInitialSkills();">
 						<label for="checkbox-17">Vacc Suit 0</label>
-						<input type="checkbox" name="vaccSuit" id="checkbox-17">
+						<input type="checkbox" name="vacc-suit" id="checkbox-17" onclick="checkInitialSkills();">
 
 					</fieldset>
-
-					<button id="continue-button-page-4" onclick="changeTab(4,5)" class="ui-button ui-widget"> Continue </button>
+					<button id="continue-button-page-4" onclick="changeTab(4,5)" class="ui-button ui-widget ui-state-disabled" disabled> Continue </button>
 				</div>
 				<div id="tab-5" class="main-pane-tab" hidden=true>
 					<h1> Pre-Career Education </h1>
